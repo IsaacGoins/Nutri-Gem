@@ -8,8 +8,11 @@ It provides an all-in-one dashboard to track your daily macronutrients, water in
 
 ## 🚀 Features
 
-* **AI-Powered Meal Logging:** Use the Gemini API to intelligently analyze meals. Simply provide a description or a photo, and the AI will estimate Calories, Protein, Carbohydrates, and Fat.
-* **FDA Data Cross-Referencing:** The app uses the FDA FoodData Central API to verify and accurately pull nutritional data for foods, ensuring the AI's estimates are grounded in real, scientific data.
+* **AI-Powered Multi-Tiered Meal Logging:** Uses the `gemini-3.1-flash-lite` model to intelligently analyze natural language descriptions. The app automatically groups ingredients logically into meals and dynamically calculates precise portion sizes (e.g., "half a cup", "3 pounds").
+* **FDA Data Cross-Referencing & Scaling:** The system uses a multi-tiered architecture for supreme accuracy:
+  * **Tier 1 (Composite Meals):** Looks up full meals in the FDA FoodData Central API.
+  * **Tier 2 (Ingredient Breakdown):** If the meal is complex, the app forces an ingredient-level breakdown and queries the FDA for each distinct component.
+  * **Intelligent Portion Scaling:** FDA data is algorithmically scaled to match your exact requested portion size by cross-referencing Gemini's dynamic calorie estimations with the FDA's highly-accurate macro ratios. Items successfully verified by the FDA receive a visual "FDA Verified" badge in the UI.
 * **Daily Macro Dashboard:** A beautiful, quick-glance UI that shows a circular progress ring of your daily caloric intake alongside your protein, carb, and fat goals.
 * **Water Tracking:** Quickly log water intake throughout the day (in ounces). Features a dedicated screen with a daily intake summary.
 * **Weight Analytics & Goals:** Log your weight daily, set a target weight goal, and visualize your progress over time on an interactive, customized line graph.
