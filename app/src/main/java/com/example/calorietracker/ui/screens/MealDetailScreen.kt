@@ -234,7 +234,8 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                         Text(date, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
                     }
                     items(mealsForDay, key = { it.id }) { meal ->
-                        var expanded by remember { mutableStateOf(false) }
+                        key(meal) {
+                            var expanded by remember { mutableStateOf(false) }
                         
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = {
@@ -309,6 +310,7 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                                     }
                                 }
                             }
+                        }
                         }
                     }
                 }
