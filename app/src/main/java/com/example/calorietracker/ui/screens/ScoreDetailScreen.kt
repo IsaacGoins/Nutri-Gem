@@ -113,12 +113,14 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 
 @Composable
 fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOverall: Boolean = false) {
-    val containerColor = if (isOverall) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val containerColor = MaterialTheme.colorScheme.surfaceVariant
     val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val borderStroke = if (isOverall) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary) else null
     
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = containerColor)
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = borderStroke
     ) {
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -127,7 +129,7 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOv
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = textColor)
             Spacer(modifier = Modifier.height(16.dp))
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
-                val primaryColor = MaterialTheme.colorScheme.tertiary
+                val primaryColor = if (isOverall) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
                 val trackColor = primaryColor.copy(alpha = 0.2f)
                 
                 Canvas(modifier = Modifier.size(80.dp)) {
