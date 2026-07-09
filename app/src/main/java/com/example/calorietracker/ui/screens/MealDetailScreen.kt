@@ -661,8 +661,7 @@ fun MacroHistoryGraph(
     }
     
     var selectedIndex by remember(endingAt, filteredDays) { 
-        val i = filteredDays.indexOfFirst { it.timestamp == endingAt }
-        mutableStateOf<Int?>(if (i != -1) i else null) 
+        mutableStateOf<Int?>(null) 
     }
     
     Box(modifier = Modifier.fillMaxSize()) {

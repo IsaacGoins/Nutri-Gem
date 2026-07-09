@@ -220,11 +220,7 @@ fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailySc
     val maxScore = 100f
     val lineColor = MaterialTheme.colorScheme.tertiary
     var selectedIndex by remember(endingAt, sortedScores) { 
-        val initialSelection = if (endingAt != null) {
-            val i = sortedScores.indexOfFirst { it.dateTimestamp == endingAt }
-            if (i != -1) i else null
-        } else null
-        mutableStateOf<Int?>(initialSelection) 
+        mutableStateOf<Int?>(null) 
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
