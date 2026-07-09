@@ -465,7 +465,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
-            itemsIndexed(editedItems) { index, item ->
+            itemsIndexed(editedItems, key = { _, item -> item.id }) { index, item ->
                 val dismissState = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
                         if (it == SwipeToDismissBoxValue.EndToStart) {
@@ -570,7 +570,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                 Text("Add Items via AI", style = MaterialTheme.typography.titleMedium)
             }
 
-            itemsIndexed(aiItems) { index, item ->
+            itemsIndexed(aiItems, key = { _, item -> item.id }) { index, item ->
                 val dismissState = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
                         if (it == SwipeToDismissBoxValue.EndToStart) {

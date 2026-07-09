@@ -34,7 +34,8 @@ data class MealItemInput(
     var calories: String = "",
     var proteinG: String = "",
     var carbsG: String = "",
-    var fatG: String = ""
+    var fatG: String = "",
+    val id: String = java.util.UUID.randomUUID().toString()
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +86,7 @@ fun AddMealScreen(
                         }
 
                         LazyColumn(modifier = Modifier.weight(1f)) {
-                            itemsIndexed(mealItems) { index, item ->
+                            itemsIndexed(mealItems, key = { _, item -> item.id }) { index, item ->
                                     val dismissState = rememberSwipeToDismissBoxState(
                                         confirmValueChange = {
                                             if (it == SwipeToDismissBoxValue.EndToStart) {

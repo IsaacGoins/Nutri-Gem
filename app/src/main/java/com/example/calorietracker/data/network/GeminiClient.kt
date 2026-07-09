@@ -63,7 +63,8 @@ data class GeminiItem(
     var protein_g: Int = 0,
     var carbs_g: Int = 0,
     var fat_g: Int = 0,
-    var isFdaVerified: Boolean = false
+    var isFdaVerified: Boolean = false,
+    val id: String = java.util.UUID.randomUUID().toString()
 )
 
 class GeminiClient {
