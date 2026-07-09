@@ -9,6 +9,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -311,6 +313,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                             itemsJson = Json.encodeToString(editedItems.toList())
                         )
                         onSave(updatedMeal)
+                        Toast.makeText(context, "Meal has been saved", Toast.LENGTH_SHORT).show()
                     }) {
                         Text("Save")
                     }

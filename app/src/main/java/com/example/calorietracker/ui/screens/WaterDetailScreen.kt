@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -308,6 +310,7 @@ fun WaterHistoryGraph(
 fun EditWaterDialog(water: WaterEntity, onDismiss: () -> Unit, onSave: (WaterEntity) -> Unit) {
     var amountText by remember { mutableStateOf(water.amountOz.toString()) }
     var editedTimestamp by remember { mutableStateOf(water.timestamp) }
+    val context = LocalContext.current
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -388,6 +391,7 @@ fun EditWaterDialog(water: WaterEntity, onDismiss: () -> Unit, onSave: (WaterEnt
                 val amount = amountText.toIntOrNull()
                 if (amount != null && amount > 0) {
                     onSave(water.copy(amountOz = amount, timestamp = editedTimestamp))
+                    Toast.makeText(context, "Water intake has been saved", Toast.LENGTH_SHORT).show()
                 }
             }) {
                 Text("Save")

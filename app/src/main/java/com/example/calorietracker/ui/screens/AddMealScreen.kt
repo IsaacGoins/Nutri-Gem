@@ -25,6 +25,8 @@ import com.example.calorietracker.ui.viewmodels.MainViewModel
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 
 data class MealItemInput(
     var name: String = "",
@@ -49,6 +51,7 @@ fun AddMealScreen(
     val mealItems = remember { mutableStateListOf(MealItemInput()) }
     var clarificationAnswer by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     // Reset state when leaving
     DisposableEffect(Unit) {
@@ -582,6 +585,7 @@ fun AddMealScreen(
                                     data.macros.fat_g = totalFat
                                     data.items = editedItems.toList()
                                     viewModel.saveMeal(state.response, editedTimestamp)
+                                    Toast.makeText(context, "Meal has been saved", Toast.LENGTH_SHORT).show()
                                     onSaveComplete()
                                 }) {
                                     Text("Save Meal")

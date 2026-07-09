@@ -11,6 +11,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -32,6 +34,7 @@ import java.util.Locale
 fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val weightLog by viewModel.allWeight.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     
     // Group by day
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -239,6 +242,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         TextButton(onClick = {
                             goalInput.toFloatOrNull()?.let {
                                 viewModel.saveWeightGoal(it)
+                                Toast.makeText(context, "Weight goal has been saved", Toast.LENGTH_SHORT).show()
                             }
                             showGoalDialog = false
                         }) { Text("Save") }
@@ -268,9 +272,10 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             val lbs = weightInput.toFloatOrNull()
                             if (lbs != null && lbs > 0) {
                                 viewModel.addWeight(lbs)
+                                Toast.makeText(context, "Weight has been saved", Toast.LENGTH_SHORT).show()
                                 showAddDialog = false
                             }
-                        }) { Text("Add") }
+                        }) { Text("Save") }
                     },
                     dismissButton = {
                         TextButton(onClick = { showAddDialog = false }) { Text("Cancel") }

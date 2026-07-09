@@ -12,6 +12,8 @@ import com.example.calorietracker.ui.viewmodels.MainViewModel
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +26,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val apiKey by viewModel.apiKey.collectAsState()
     var inputKey by remember { mutableStateOf(apiKey) }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -56,8 +59,11 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { viewModel.saveApiKey(inputKey) },
+            OutlinedButton(
+                onClick = { 
+                    viewModel.saveApiKey(inputKey) 
+                    Toast.makeText(context, "Gemini Key has been saved", Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Gemini Key")
@@ -78,8 +84,11 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { viewModel.saveFdaApiKey(inputFdaKey) },
+            OutlinedButton(
+                onClick = { 
+                    viewModel.saveFdaApiKey(inputFdaKey) 
+                    Toast.makeText(context, "FDA Key has been saved", Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save FDA Key")
@@ -168,6 +177,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     viewModel.saveWorkoutsPerWeek(selectedDays.size)
                     viewModel.saveActiveDays(selectedDays.joinToString(","))
                     viewModel.saveProfileNotes(inputNotes)
+                    Toast.makeText(context, "Profile has been saved", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
