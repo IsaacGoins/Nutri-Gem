@@ -70,7 +70,7 @@ class GeminiClient {
         }
 
         val generativeModel = GenerativeModel(
-            modelName = "gemini-flash-latest",
+            modelName = "gemini-3.1-flash-lite",
             apiKey = apiKey,
             generationConfig = config,
             systemInstruction = com.google.ai.client.generativeai.type.content {
