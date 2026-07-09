@@ -26,13 +26,20 @@ data class FdaNutrient(
     val value: Double = 0.0
 )
 
+data class FdaMacros(
+    val calories: Int,
+    val protein: Int,
+    val carbs: Int,
+    val fat: Int
+)
+
 class FdaClient {
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
 
-    suspend fun searchFood(apiKey: String, query: String): String? = withContext(Dispatchers.IO) {
+    suspend fun searchFoodStructured(apiKey: String, query: String): FdaMacros? = withContext(Dispatchers.IO) {
         if (apiKey.isBlank() || query.isBlank()) return@withContext null
 
         try {
@@ -49,12 +56,31 @@ class FdaClient {
                 
                 val firstFood = response.foods.firstOrNull() ?: return@withContext null
                 
-                // Format the nutrients nicely for Gemini to save tokens
-                val nutrientsText = firstFood.foodNutrients.joinToString(", ") { 
-                    "${it.nutrientName}: ${it.value}${it.unitName}"
+                var calories = 0
+                var protein = 0
+                var carbs = 0
+                var fat = 0
+
+                firstFood.foodNutrients.forEach { nutrient ->
+                    val name = nutrient.nutrientName.lowercase()
+                    val value = nutrient.value.toInt()
+                    if (name.contains("energy") && nutrient.unitName.equals("kcal", ignoreCase = true)) {
+                        calories = value
+                    } else if (name.contains("protein")) {
+                        protein = value
+                    } else if (name.contains("carbohydrate")) {
+                        carbs = value
+                    } else if (name.contains("lipid") || name.contains("fat")) {
+                        fat = value
+                    }
                 }
                 
-                return@withContext "FDA Data for '${firstFood.description}': $nutrientsText"
+                // If it returned 0 for everything, maybe it's not a valid match?
+                if (calories == 0 && protein == 0 && carbs == 0 && fat == 0) {
+                    return@withContext null
+                }
+
+                return@withContext FdaMacros(calories, protein, carbs, fat)
             }
         } catch (e: Exception) {
             e.printStackTrace()
