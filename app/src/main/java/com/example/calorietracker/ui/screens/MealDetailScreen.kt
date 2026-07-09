@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -505,6 +506,9 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                                     value = item.name,
                                     onValueChange = { editedItems[index] = item.copy(name = it) },
                                     label = { Text("Name") },
+                                    trailingIcon = if (item.isFdaVerified) {
+                                        { Icon(Icons.Default.Check, contentDescription = "FDA Verified", tint = Color(0xFF4CAF50)) }
+                                    } else null,
                                     modifier = Modifier.weight(1.5f)
                                 )
                                 OutlinedTextField(
