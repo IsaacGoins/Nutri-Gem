@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -199,11 +200,11 @@ fun WaterBanner(water: Int, onClick: () -> Unit) {
         )
     ) {
         Row(
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text("Water Intake", style = MaterialTheme.typography.titleMedium)
                 Text("$water oz", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             }
@@ -225,7 +226,7 @@ fun WeightBanner(weight: Float, onClick: () -> Unit) {
         )
     ) {
         Row(
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -234,6 +235,7 @@ fun WeightBanner(weight: Float, onClick: () -> Unit) {
                 val weightStr = if (weight > 0f) "$weight lbs" else "-- lbs"
                 Text(weightStr, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             }
+            Icon(Icons.Default.MonitorWeight, contentDescription = null, modifier = Modifier.size(48.dp))
         }
     }
 }
