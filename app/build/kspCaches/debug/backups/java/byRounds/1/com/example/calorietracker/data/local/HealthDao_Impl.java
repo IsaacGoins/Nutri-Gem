@@ -4,6 +4,7 @@ import android.database.Cursor;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.CoroutinesRoom;
+import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
@@ -35,13 +36,19 @@ public final class HealthDao_Impl implements HealthDao {
 
   private final EntityInsertionAdapter<WaterEntity> __insertionAdapterOfWaterEntity;
 
+  private final EntityDeletionOrUpdateAdapter<MealEntity> __deletionAdapterOfMealEntity;
+
+  private final EntityDeletionOrUpdateAdapter<WaterEntity> __deletionAdapterOfWaterEntity;
+
+  private final EntityDeletionOrUpdateAdapter<MealEntity> __updateAdapterOfMealEntity;
+
   public HealthDao_Impl(@NonNull final RoomDatabase __db) {
     this.__db = __db;
     this.__insertionAdapterOfMealEntity = new EntityInsertionAdapter<MealEntity>(__db) {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR ABORT INTO `meals` (`id`,`name`,`calories`,`proteinG`,`carbsG`,`fatG`,`timestamp`) VALUES (nullif(?, 0),?,?,?,?,?,?)";
+        return "INSERT OR ABORT INTO `meals` (`id`,`name`,`calories`,`proteinG`,`carbsG`,`fatG`,`timestamp`,`itemsJson`) VALUES (nullif(?, 0),?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -54,6 +61,7 @@ public final class HealthDao_Impl implements HealthDao {
         statement.bindLong(5, entity.getCarbsG());
         statement.bindLong(6, entity.getFatG());
         statement.bindLong(7, entity.getTimestamp());
+        statement.bindString(8, entity.getItemsJson());
       }
     };
     this.__insertionAdapterOfWaterEntity = new EntityInsertionAdapter<WaterEntity>(__db) {
@@ -69,6 +77,53 @@ public final class HealthDao_Impl implements HealthDao {
         statement.bindLong(1, entity.getId());
         statement.bindLong(2, entity.getAmountOz());
         statement.bindLong(3, entity.getTimestamp());
+      }
+    };
+    this.__deletionAdapterOfMealEntity = new EntityDeletionOrUpdateAdapter<MealEntity>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "DELETE FROM `meals` WHERE `id` = ?";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement,
+          @NonNull final MealEntity entity) {
+        statement.bindLong(1, entity.getId());
+      }
+    };
+    this.__deletionAdapterOfWaterEntity = new EntityDeletionOrUpdateAdapter<WaterEntity>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "DELETE FROM `water_intake` WHERE `id` = ?";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement,
+          @NonNull final WaterEntity entity) {
+        statement.bindLong(1, entity.getId());
+      }
+    };
+    this.__updateAdapterOfMealEntity = new EntityDeletionOrUpdateAdapter<MealEntity>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "UPDATE OR ABORT `meals` SET `id` = ?,`name` = ?,`calories` = ?,`proteinG` = ?,`carbsG` = ?,`fatG` = ?,`timestamp` = ?,`itemsJson` = ? WHERE `id` = ?";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement,
+          @NonNull final MealEntity entity) {
+        statement.bindLong(1, entity.getId());
+        statement.bindString(2, entity.getName());
+        statement.bindLong(3, entity.getCalories());
+        statement.bindLong(4, entity.getProteinG());
+        statement.bindLong(5, entity.getCarbsG());
+        statement.bindLong(6, entity.getFatG());
+        statement.bindLong(7, entity.getTimestamp());
+        statement.bindString(8, entity.getItemsJson());
+        statement.bindLong(9, entity.getId());
       }
     };
   }
@@ -110,6 +165,60 @@ public final class HealthDao_Impl implements HealthDao {
   }
 
   @Override
+  public Object deleteMeal(final MealEntity meal, final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __deletionAdapterOfMealEntity.handle(meal);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object deleteWater(final WaterEntity water, final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __deletionAdapterOfWaterEntity.handle(water);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object updateMeal(final MealEntity meal, final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __updateAdapterOfMealEntity.handle(meal);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
   public Flow<List<MealEntity>> getAllMeals() {
     final String _sql = "SELECT * FROM meals ORDER BY timestamp DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
@@ -126,6 +235,7 @@ public final class HealthDao_Impl implements HealthDao {
           final int _cursorIndexOfCarbsG = CursorUtil.getColumnIndexOrThrow(_cursor, "carbsG");
           final int _cursorIndexOfFatG = CursorUtil.getColumnIndexOrThrow(_cursor, "fatG");
           final int _cursorIndexOfTimestamp = CursorUtil.getColumnIndexOrThrow(_cursor, "timestamp");
+          final int _cursorIndexOfItemsJson = CursorUtil.getColumnIndexOrThrow(_cursor, "itemsJson");
           final List<MealEntity> _result = new ArrayList<MealEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final MealEntity _item;
@@ -143,7 +253,9 @@ public final class HealthDao_Impl implements HealthDao {
             _tmpFatG = _cursor.getInt(_cursorIndexOfFatG);
             final long _tmpTimestamp;
             _tmpTimestamp = _cursor.getLong(_cursorIndexOfTimestamp);
-            _item = new MealEntity(_tmpId,_tmpName,_tmpCalories,_tmpProteinG,_tmpCarbsG,_tmpFatG,_tmpTimestamp);
+            final String _tmpItemsJson;
+            _tmpItemsJson = _cursor.getString(_cursorIndexOfItemsJson);
+            _item = new MealEntity(_tmpId,_tmpName,_tmpCalories,_tmpProteinG,_tmpCarbsG,_tmpFatG,_tmpTimestamp,_tmpItemsJson);
             _result.add(_item);
           }
           return _result;

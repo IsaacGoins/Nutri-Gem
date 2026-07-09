@@ -10,11 +10,20 @@ interface HealthDao {
     @Insert
     suspend fun insertMeal(meal: MealEntity)
 
+    @androidx.room.Update
+    suspend fun updateMeal(meal: MealEntity)
+
+    @androidx.room.Delete
+    suspend fun deleteMeal(meal: MealEntity)
+
     @Query("SELECT * FROM meals ORDER BY timestamp DESC")
     fun getAllMeals(): Flow<List<MealEntity>>
 
     @Insert
     suspend fun insertWater(water: WaterEntity)
+
+    @androidx.room.Delete
+    suspend fun deleteWater(water: WaterEntity)
 
     @Query("SELECT * FROM water_intake ORDER BY timestamp DESC")
     fun getAllWater(): Flow<List<WaterEntity>>

@@ -15,31 +15,38 @@ data class GeminiResponse(
 
 @Serializable
 data class GeminiData(
-    val meal_name: String,
-    val total_calories: Int,
-    val macros: GeminiMacros,
-    val items: List<GeminiItem>
+    var meal_name: String,
+    var total_calories: Int,
+    var macros: GeminiMacros,
+    var items: List<GeminiItem>
 )
 
 @Serializable
 data class GeminiMacros(
-    val protein_g: Int,
-    val carbs_g: Int,
-    val fat_g: Int
+    var protein_g: Int,
+    var carbs_g: Int,
+    var fat_g: Int
 )
 
 @Serializable
 data class GeminiItem(
-    val name: String,
-    val calories: Int
+    var name: String,
+    var calories: Int,
+    var protein_g: Int = 0,
+    var carbs_g: Int = 0,
+    var fat_g: Int = 0
 )
 
 class GeminiClient {
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json { 
+        ignoreUnknownKeys = true
+        isLenient = true 
+    }
 
     suspend fun analyzeMeal(apiKey: String, prompt: String): GeminiResponse {
         val jsonSchemaDefinition = """
-        You must return ONLY a raw JSON object matching this exact schema (no markdown formatting, no backticks):
+        You must return ONLY a raw JSON object matching this exact schema (no markdown formatting, no backticks).
+        CRITICAL: All numeric fields (total_calories, protein_g, carbs_g, fat_g, calories) MUST be integers, NOT strings. DO NOT put quotes around numbers.
         {
             "status": "success | needs_clarification",
             "clarification_question": "string (optional)",
@@ -52,7 +59,7 @@ class GeminiClient {
                     "fat_g": 0
                 },
                 "items": [
-                    { "name": "string", "calories": 0 }
+                    { "name": "string", "calories": 0, "protein_g": 0, "carbs_g": 0, "fat_g": 0 }
                 ]
             }
         }

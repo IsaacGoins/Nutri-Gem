@@ -11,7 +11,8 @@ data class MealEntity(
     val proteinG: Int,
     val carbsG: Int,
     val fatG: Int,
-    val timestamp: Long
+    val timestamp: Long,
+    val itemsJson: String = "[]"
 )
 
 @Entity(tableName = "water_intake")

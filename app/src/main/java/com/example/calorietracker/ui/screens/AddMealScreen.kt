@@ -1,8 +1,10 @@
 package com.example.calorietracker.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.GeminiState
@@ -19,7 +22,12 @@ import com.example.calorietracker.ui.viewmodels.MainViewModel
 data class MealItemInput(
     var name: String = "",
     var quantity: String = "",
-    var unit: String = ""
+    var unit: String = "",
+    var isManual: Boolean = false,
+    var calories: String = "",
+    var proteinG: String = "",
+    var carbsG: String = "",
+    var fatG: String = ""
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,72 +76,202 @@ fun AddMealScreen(
 
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             itemsIndexed(mealItems) { index, item ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    OutlinedTextField(
-                                        value = item.name,
-                                        onValueChange = { mealItems[index] = item.copy(name = it) },
-                                        label = { Text("Item") },
-                                        modifier = Modifier.weight(2f)
+                                    val dismissState = rememberSwipeToDismissBoxState(
+                                        confirmValueChange = {
+                                            if (it == SwipeToDismissBoxValue.EndToStart) {
+                                                if (mealItems.size > 1) {
+                                                    mealItems.removeAt(index)
+                                                }
+                                                false
+                                            } else {
+                                                false
+                                            }
+                                        }
                                     )
-                                    OutlinedTextField(
-                                        value = item.quantity,
-                                        onValueChange = { mealItems[index] = item.copy(quantity = it) },
-                                        label = { Text("Qty") },
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    var expanded by remember { mutableStateOf(false) }
-                                    val unitOptions = listOf("g", "oz", "cups", "tbsp", "tsp", "ml", "pieces")
-
-                                    ExposedDropdownMenuBox(
-                                        expanded = expanded,
-                                        onExpandedChange = { expanded = !expanded },
-                                        modifier = Modifier.weight(1.5f)
+                                    
+                                    SwipeToDismissBox(
+                                        state = dismissState,
+                                        enableDismissFromStartToEnd = false,
+                                        backgroundContent = {
+                                            val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                                MaterialTheme.colorScheme.error
+                                            } else {
+                                                Color.Transparent
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(color, RoundedCornerShape(8.dp))
+                                                    .padding(horizontal = 20.dp),
+                                                contentAlignment = Alignment.CenterEnd
+                                            ) {
+                                                if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onError)
+                                                }
+                                            }
+                                        }
                                     ) {
-                                        OutlinedTextField(
-                                            value = item.unit,
-                                            onValueChange = { mealItems[index] = item.copy(unit = it) },
-                                            label = { Text("Unit") },
-                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                            modifier = Modifier.menuAnchor()
-                                        )
-                                        ExposedDropdownMenu(
-                                            expanded = expanded,
-                                            onDismissRequest = { expanded = false }
-                                        ) {
-                                            unitOptions.forEach { option ->
-                                                DropdownMenuItem(
-                                                    text = { Text(option) },
-                                                    onClick = {
-                                                        mealItems[index] = item.copy(unit = option)
-                                                        expanded = false
+                                        Card(modifier = Modifier.fillMaxWidth()) {
+                                            Column(
+                                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                            if (item.isManual) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    OutlinedTextField(
+                                                        value = item.name,
+                                                        onValueChange = { mealItems[index] = item.copy(name = it) },
+                                                        label = { Text("Item Name") },
+                                                        singleLine = true,
+                                                        modifier = Modifier.weight(1.5f)
+                                                    )
+                                                    OutlinedTextField(
+                                                        value = item.calories,
+                                                        onValueChange = { mealItems[index] = item.copy(calories = it) },
+                                                        label = { Text("Kcal") },
+                                                        singleLine = true,
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                }
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    OutlinedTextField(
+                                                        value = item.proteinG,
+                                                        onValueChange = { mealItems[index] = item.copy(proteinG = it) },
+                                                        label = { Text("Pro(g)") },
+                                                        singleLine = true,
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    OutlinedTextField(
+                                                        value = item.carbsG,
+                                                        onValueChange = { mealItems[index] = item.copy(carbsG = it) },
+                                                        label = { Text("Carb(g)") },
+                                                        singleLine = true,
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    OutlinedTextField(
+                                                        value = item.fatG,
+                                                        onValueChange = { mealItems[index] = item.copy(fatG = it) },
+                                                        label = { Text("Fat(g)") },
+                                                        singleLine = true,
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                }
+                                            } else {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    OutlinedTextField(
+                                                        value = item.name,
+                                                        onValueChange = { mealItems[index] = item.copy(name = it) },
+                                                        label = { Text("Item") },
+                                                        singleLine = true,
+                                                        modifier = Modifier.weight(2f)
+                                                    )
+                                                    OutlinedTextField(
+                                                        value = item.quantity,
+                                                        onValueChange = { mealItems[index] = item.copy(quantity = it) },
+                                                        label = { Text("Qty") },
+                                                        singleLine = true,
+                                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    var expanded by remember { mutableStateOf(false) }
+                                                    val unitOptions = listOf("g", "oz", "cup", "tbsp", "tsp", "ml", "piece")
+
+                                                    ExposedDropdownMenuBox(
+                                                        expanded = expanded,
+                                                        onExpandedChange = { expanded = !expanded },
+                                                        modifier = Modifier.weight(1.5f)
+                                                    ) {
+                                                        OutlinedTextField(
+                                                            value = item.unit,
+                                                            onValueChange = { mealItems[index] = item.copy(unit = it) },
+                                                            label = { Text("Unit") },
+                                                            singleLine = true,
+                                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                                            modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = true)
+                                                        )
+                                                        ExposedDropdownMenu(
+                                                            expanded = expanded,
+                                                            onDismissRequest = { expanded = false }
+                                                        ) {
+                                                            unitOptions.forEach { option ->
+                                                                DropdownMenuItem(
+                                                                    text = { Text(option) },
+                                                                    onClick = {
+                                                                        mealItems[index] = item.copy(unit = option)
+                                                                        expanded = false
+                                                                    }
+                                                                )
+                                                            }
+                                                        }
                                                     }
-                                                )
+                                                }
+                                            }
                                             }
                                         }
                                     }
-                                    IconButton(onClick = { if (mealItems.size > 1) mealItems.removeAt(index) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Remove")
-                                    }
-                                }
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                             item {
-                                TextButton(onClick = { mealItems.add(MealItemInput()) }) {
-                                    Text("+ Add Item")
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    TextButton(onClick = { mealItems.add(MealItemInput()) }) {
+                                        Text("+ Add Item")
+                                    }
+                                    TextButton(onClick = { mealItems.add(MealItemInput(isManual = true)) }) {
+                                        Text("+ Add Manual Item")
+                                    }
                                 }
                             }
                         }
 
                         Button(
                             onClick = {
-                                val prompt = "Calculate macros for the following meal:\n" +
-                                        mealItems.joinToString("\n") { "${it.quantity} ${it.unit} of ${it.name}" }
-                                viewModel.analyzeMeal(prompt)
+                                val aiItems = mealItems.filter { !it.isManual }
+                                val manualItems = mealItems.filter { it.isManual }.map {
+                                    com.example.calorietracker.data.network.GeminiItem(
+                                        name = it.name.ifBlank { "Custom Item" },
+                                        calories = it.calories.toIntOrNull() ?: 0,
+                                        protein_g = it.proteinG.toIntOrNull() ?: 0,
+                                        carbs_g = it.carbsG.toIntOrNull() ?: 0,
+                                        fat_g = it.fatG.toIntOrNull() ?: 0
+                                    )
+                                }
+
+                                if (aiItems.isEmpty() && manualItems.isNotEmpty()) {
+                                    val data = com.example.calorietracker.data.network.GeminiData(
+                                        meal_name = "Custom Meal",
+                                        total_calories = manualItems.sumOf { it.calories },
+                                        macros = com.example.calorietracker.data.network.GeminiMacros(
+                                            protein_g = manualItems.sumOf { it.protein_g },
+                                            carbs_g = manualItems.sumOf { it.carbs_g },
+                                            fat_g = manualItems.sumOf { it.fat_g }
+                                        ),
+                                        items = manualItems
+                                    )
+                                    viewModel.setGeminiSuccessState(data)
+                                } else if (aiItems.isNotEmpty()) {
+                                    val prompt = "Calculate macros for the following meal:\n" +
+                                            aiItems.joinToString("\n") { "${it.quantity} ${it.unit} of ${it.name}" }
+                                    viewModel.analyzeMeal(prompt, manualItems)
+                                }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -142,7 +280,13 @@ fun AddMealScreen(
                     }
                 }
                 is GeminiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(), 
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("Analyzing meal with AI...", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(16.dp))
                         CircularProgressIndicator()
                     }
                 }
@@ -182,25 +326,98 @@ fun AddMealScreen(
                 is GeminiState.Success -> {
                     val data = state.response.data
                     if (data != null) {
+                        var editedMealName by remember { mutableStateOf(data.meal_name) }
+                        val editedItems = remember { mutableStateListOf(*data.items.map { it.copy() }.toTypedArray()) }
+                        
+                        val totalCalories = editedItems.sumOf { it.calories }
+                        val totalProtein = editedItems.sumOf { it.protein_g }
+                        val totalCarbs = editedItems.sumOf { it.carbs_g }
+                        val totalFat = editedItems.sumOf { it.fat_g }
+
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("Meal: ${data.meal_name}", style = MaterialTheme.typography.headlineMedium)
-                            Text("Total Calories: ${data.total_calories} kcal", style = MaterialTheme.typography.titleLarge)
+                            OutlinedTextField(
+                                value = editedMealName,
+                                onValueChange = { editedMealName = it },
+                                label = { Text("Meal Name") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("Protein: ${data.macros.protein_g}g", style = MaterialTheme.typography.bodyLarge)
-                            Text("Carbs: ${data.macros.carbs_g}g", style = MaterialTheme.typography.bodyLarge)
-                            Text("Fat: ${data.macros.fat_g}g", style = MaterialTheme.typography.bodyLarge)
-                            Spacer(modifier = Modifier.height(32.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Calories: $totalCalories", style = MaterialTheme.typography.titleMedium)
+                                Text("Protein: ${totalProtein}g", style = MaterialTheme.typography.titleMedium)
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Carbs: ${totalCarbs}g", style = MaterialTheme.typography.titleMedium)
+                                Text("Fat: ${totalFat}g", style = MaterialTheme.typography.titleMedium)
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Edit Items Breakdown", style = MaterialTheme.typography.titleMedium)
+                            
+                            LazyColumn(modifier = Modifier.weight(1f)) {
+                                itemsIndexed(editedItems) { index, item ->
+                                    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                        Column(modifier = Modifier.padding(8.dp)) {
+                                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                OutlinedTextField(
+                                                    value = item.name,
+                                                    onValueChange = { editedItems[index] = item.copy(name = it) },
+                                                    label = { Text("Name") },
+                                                    modifier = Modifier.weight(1.5f)
+                                                )
+                                                OutlinedTextField(
+                                                    value = if (item.calories == 0) "" else item.calories.toString(),
+                                                    onValueChange = { editedItems[index] = item.copy(calories = it.toIntOrNull() ?: 0) },
+                                                    label = { Text("Kcal") },
+                                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                OutlinedTextField(
+                                                    value = if (item.protein_g == 0) "" else item.protein_g.toString(),
+                                                    onValueChange = { editedItems[index] = item.copy(protein_g = it.toIntOrNull() ?: 0) },
+                                                    label = { Text("Pro(g)") },
+                                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                OutlinedTextField(
+                                                    value = if (item.carbs_g == 0) "" else item.carbs_g.toString(),
+                                                    onValueChange = { editedItems[index] = item.copy(carbs_g = it.toIntOrNull() ?: 0) },
+                                                    label = { Text("Carb(g)") },
+                                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                OutlinedTextField(
+                                                    value = if (item.fat_g == 0) "" else item.fat_g.toString(),
+                                                    onValueChange = { editedItems[index] = item.copy(fat_g = it.toIntOrNull() ?: 0) },
+                                                    label = { Text("Fat(g)") },
+                                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 OutlinedButton(onClick = { viewModel.resetGeminiState() }) {
                                     Text("Discard")
                                 }
                                 Button(onClick = {
+                                    data.meal_name = editedMealName
+                                    data.total_calories = totalCalories
+                                    data.macros.protein_g = totalProtein
+                                    data.macros.carbs_g = totalCarbs
+                                    data.macros.fat_g = totalFat
+                                    data.items = editedItems.toList()
                                     viewModel.saveMeal(state.response)
                                     onSaveComplete()
                                 }) {

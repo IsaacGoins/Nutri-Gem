@@ -22,4 +22,16 @@ class HealthRepository(private val healthDao: HealthDao) {
     suspend fun addWater(water: WaterEntity) {
         healthDao.insertWater(water)
     }
+
+    suspend fun updateMeal(meal: MealEntity) {
+        healthDao.updateMeal(meal)
+    }
+
+    suspend fun deleteMeal(meal: MealEntity) {
+        healthDao.deleteMeal(meal)
+    }
+
+    suspend fun deleteWater(water: WaterEntity) {
+        healthDao.deleteWater(water)
+    }
 }

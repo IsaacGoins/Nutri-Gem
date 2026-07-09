@@ -36,42 +36,6 @@ fun HomeScreen(
     val fat by viewModel.fatForDay.collectAsState()
     val water by viewModel.waterForDay.collectAsState()
 
-    var waterDialExpanded by remember { mutableStateOf(false) }
-    var showCustomWaterDialog by remember { mutableStateOf(false) }
-    var customWaterAmount by remember { mutableStateOf("") }
-
-    if (showCustomWaterDialog) {
-        AlertDialog(
-            onDismissRequest = { showCustomWaterDialog = false },
-            title = { Text("Custom Amount") },
-            text = {
-                OutlinedTextField(
-                    value = customWaterAmount,
-                    onValueChange = { customWaterAmount = it },
-                    label = { Text("Amount (oz)") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    val amount = customWaterAmount.toIntOrNull()
-                    if (amount != null && amount > 0) {
-                        viewModel.addWater(amount)
-                    }
-                    showCustomWaterDialog = false
-                    customWaterAmount = ""
-                }) {
-                    Text("Add")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCustomWaterDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,59 +47,27 @@ fun HomeScreen(
                 }
             )
         },
-        floatingActionButton = {
-            Row(verticalAlignment = Alignment.Bottom) {
-                FloatingActionButtonMenu(
-                    expanded = waterDialExpanded,
-                    button = {
-                        ToggleFloatingActionButton(
-                            checked = waterDialExpanded,
-                            onCheckedChange = { waterDialExpanded = it }
-                        ) {
-                            Icon(Icons.Default.LocalDrink, contentDescription = "Add Water")
-                        }
-                    }
-                ) {
-                    FloatingActionButtonMenuItem(
-                        onClick = { viewModel.addWater(8); waterDialExpanded = false },
-                        icon = { Icon(Icons.Default.LocalDrink, contentDescription = null) },
-                        text = { Text("+8oz") }
-                    )
-                    FloatingActionButtonMenuItem(
-                        onClick = { viewModel.addWater(16); waterDialExpanded = false },
-                        icon = { Icon(Icons.Default.LocalDrink, contentDescription = null) },
-                        text = { Text("+16oz") }
-                    )
-                    FloatingActionButtonMenuItem(
-                        onClick = { showCustomWaterDialog = true; waterDialExpanded = false },
-                        icon = { Icon(Icons.Default.LocalDrink, contentDescription = null) },
-                        text = { Text("Custom") }
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                FloatingActionButton(onClick = onNavigateToAddMeal, containerColor = MaterialTheme.colorScheme.primaryContainer) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Meal")
-                }
-            }
-        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            HeroSection(
-                calories = calories ?: 0,
-                protein = protein ?: 0,
-                carbs = carbs ?: 0,
-                fat = fat ?: 0,
-                onClick = onNavigateToMeals
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                HeroSection(
+                    calories = calories ?: 0,
+                    protein = protein ?: 0,
+                    carbs = carbs ?: 0,
+                    fat = fat ?: 0,
+                    onClick = onNavigateToMeals
+                )
 
-            WaterBanner(water = water ?: 0, onClick = onNavigateToWater)
+                WaterBanner(water = water ?: 0, onClick = onNavigateToWater)
+            }
+
         }
     }
 }
@@ -171,15 +103,15 @@ fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, onClick: () -
                         var startAngle = -90f
                         
                         if (protein > 0) {
-                            drawArc(Color.Red, startAngle, proteinAngle, false, style = stroke)
+                            drawArc(Color(0xFFEF5350), startAngle, proteinAngle, false, style = stroke)
                             startAngle += proteinAngle
                         }
                         if (carbs > 0) {
-                            drawArc(Color.Green, startAngle, carbsAngle, false, style = stroke)
+                            drawArc(Color(0xFF66BB6A), startAngle, carbsAngle, false, style = stroke)
                             startAngle += carbsAngle
                         }
                         if (fat > 0) {
-                            drawArc(Color.Blue, startAngle, fatAngle, false, style = stroke)
+                            drawArc(Color(0xFF42A5F5), startAngle, fatAngle, false, style = stroke)
                         }
                     }
                 }
@@ -190,9 +122,9 @@ fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, onClick: () -
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                MacroLegend(color = Color.Red, label = "Protein", amount = "${protein}g")
-                MacroLegend(color = Color.Green, label = "Carbs", amount = "${carbs}g")
-                MacroLegend(color = Color.Blue, label = "Fat", amount = "${fat}g")
+                MacroLegend(color = Color(0xFFEF5350), label = "Protein", amount = "${protein}g")
+                MacroLegend(color = Color(0xFF66BB6A), label = "Carbs", amount = "${carbs}g")
+                MacroLegend(color = Color(0xFF42A5F5), label = "Fat", amount = "${fat}g")
             }
         }
     }
@@ -219,7 +151,10 @@ fun WaterBanner(water: Int, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     ) {
         Row(
             modifier = Modifier.padding(24.dp),

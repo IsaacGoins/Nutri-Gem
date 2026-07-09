@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.Calendar
 
 class MainViewModel(
@@ -57,7 +59,25 @@ class MainViewModel(
         }
     }
 
-    fun analyzeMeal(prompt: String) {
+    fun deleteWater(water: WaterEntity) {
+        viewModelScope.launch {
+            repository.deleteWater(water)
+        }
+    }
+
+    fun updateMeal(meal: MealEntity) {
+        viewModelScope.launch {
+            repository.updateMeal(meal)
+        }
+    }
+
+    fun deleteMeal(meal: MealEntity) {
+        viewModelScope.launch {
+            repository.deleteMeal(meal)
+        }
+    }
+
+    fun analyzeMeal(prompt: String, manualItems: List<com.example.calorietracker.data.network.GeminiItem> = emptyList()) {
         val key = _apiKey.value
         if (key.isBlank()) {
             _geminiState.value = GeminiState.Error("API Key is missing. Please set it in Settings.")
@@ -69,7 +89,17 @@ class MainViewModel(
             try {
                 val response = geminiClient.analyzeMeal(key, prompt)
                 if (response.status == "success" && response.data != null) {
-                    _geminiState.value = GeminiState.Success(response)
+                    val combinedItems = response.data.items + manualItems
+                    val combinedData = response.data.copy(
+                        items = combinedItems,
+                        total_calories = combinedItems.sumOf { it.calories },
+                        macros = com.example.calorietracker.data.network.GeminiMacros(
+                            protein_g = combinedItems.sumOf { it.protein_g },
+                            carbs_g = combinedItems.sumOf { it.carbs_g },
+                            fat_g = combinedItems.sumOf { it.fat_g }
+                        )
+                    )
+                    _geminiState.value = GeminiState.Success(response.copy(data = combinedData))
                 } else if (response.status == "needs_clarification") {
                     _geminiState.value = GeminiState.NeedsClarification(response.clarification_question ?: "Please provide more details.")
                 } else {
@@ -81,16 +111,29 @@ class MainViewModel(
         }
     }
 
+    suspend fun analyzeSingleItem(prompt: String): List<com.example.calorietracker.data.network.GeminiItem> {
+        val key = _apiKey.value
+        if (key.isBlank()) return emptyList()
+        return try {
+            val response = geminiClient.analyzeMeal(key, prompt)
+            response.data?.items ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     fun saveMeal(response: GeminiResponse) {
         viewModelScope.launch {
             response.data?.let {
+                val itemsJson = Json.encodeToString(it.items)
                 val meal = MealEntity(
                     name = it.meal_name,
                     calories = it.total_calories,
                     proteinG = it.macros.protein_g,
                     carbsG = it.macros.carbs_g,
                     fatG = it.macros.fat_g,
-                    timestamp = System.currentTimeMillis()
+                    timestamp = System.currentTimeMillis(),
+                    itemsJson = itemsJson
                 )
                 repository.addMeal(meal)
                 _geminiState.value = GeminiState.Idle
@@ -100,6 +143,15 @@ class MainViewModel(
 
     fun resetGeminiState() {
         _geminiState.value = GeminiState.Idle
+    }
+
+    fun setGeminiSuccessState(data: com.example.calorietracker.data.network.GeminiData) {
+        _geminiState.value = GeminiState.Success(
+            com.example.calorietracker.data.network.GeminiResponse(
+                status = "success",
+                data = data
+            )
+        )
     }
 }
 
