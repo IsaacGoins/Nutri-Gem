@@ -29,6 +29,9 @@ class MainViewModel(
     private val _fdaApiKey = MutableStateFlow(secureStorage.getFdaApiKey() ?: "")
     val fdaApiKey: StateFlow<String> = _fdaApiKey
 
+    private val _weightGoal = MutableStateFlow(secureStorage.getWeightGoal())
+    val weightGoal: StateFlow<Float> = _weightGoal
+
     private val startOfDay: Long
         get() {
             val calendar = Calendar.getInstance()
@@ -60,6 +63,11 @@ class MainViewModel(
     fun saveFdaApiKey(key: String) {
         secureStorage.saveFdaApiKey(key)
         _fdaApiKey.value = key
+    }
+
+    fun saveWeightGoal(weight: Float) {
+        secureStorage.saveWeightGoal(weight)
+        _weightGoal.value = weight
     }
 
     fun addWater(amountOz: Int) {

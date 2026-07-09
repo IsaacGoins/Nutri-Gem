@@ -33,4 +33,12 @@ class SecureStorage(context: Context) {
     fun getFdaApiKey(): String? {
         return sharedPreferences.getString("FDA_API_KEY", null)
     }
+
+    fun saveWeightGoal(weight: Float) {
+        sharedPreferences.edit().putFloat("WEIGHT_GOAL", weight).apply()
+    }
+
+    fun getWeightGoal(): Float {
+        return sharedPreferences.getFloat("WEIGHT_GOAL", 0f)
+    }
 }

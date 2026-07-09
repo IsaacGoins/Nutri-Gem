@@ -1,6 +1,7 @@
 package com.example.calorietracker.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -73,10 +74,34 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            val weightGoal by viewModel.weightGoal.collectAsState()
+            var showGoalDialog by remember { mutableStateOf(false) }
+
+            if (weightGoal == 0f) {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clickable { showGoalDialog = true },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text("You haven't set a weight goal yet! Tap here to set one.", modifier = Modifier.padding(16.dp))
+                }
+            } else {
+                val currentWeight = daySums.lastOrNull()?.weightLbs ?: 0f
+                if (currentWeight > 0f) {
+                    val diff = currentWeight - weightGoal
+                    val diffText = if (diff > 0) "${String.format("%.1f", diff)} lbs to go!" else if (diff < 0) "Goal passed by ${String.format("%.1f", -diff)} lbs!" else "Goal reached!"
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clickable { showGoalDialog = true },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                    ) {
+                        Text("Goal: $weightGoal lbs | Current: $currentWeight lbs\n$diffText", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+            }
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .height(240.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondary,
@@ -91,8 +116,11 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     val lineColor = MaterialTheme.colorScheme.onSecondary
                     val cardBgColor = MaterialTheme.colorScheme.secondary
                     androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(top = 24.dp, bottom = 48.dp, start = 48.dp, end = 24.dp)) {
-                        val maxWeight = daySums.maxOfOrNull { it.weightLbs }?.coerceAtLeast(100f) ?: 100f
-                        val minWeight = (daySums.minOfOrNull { it.weightLbs } ?: 0f) * 0.8f // Start Y axis a bit lower than min
+                        val allWeights = daySums.map { it.weightLbs }.toMutableList()
+                        if (weightGoal > 0f) allWeights.add(weightGoal)
+                        
+                        val maxWeight = allWeights.maxOrNull()?.coerceAtLeast(100f) ?: 100f
+                        val minWeight = (allWeights.minOrNull() ?: 0f) * 0.8f
                         val range = (maxWeight - minWeight).coerceAtLeast(10f)
                         val barWidth = size.width / (daySums.size * 2f).coerceAtLeast(1f)
                         val maxBarHeight = size.height
@@ -117,6 +145,18 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         // Y axis labels
                         drawContext.canvas.nativeCanvas.drawText(maxWeight.toInt().toString(), -40f, 0f, axisPaint)
                         drawContext.canvas.nativeCanvas.drawText(minWeight.toInt().toString(), -40f, size.height, axisPaint)
+
+                        if (weightGoal > 0f) {
+                            val goalY = size.height - (((weightGoal - minWeight) / range) * maxBarHeight)
+                            drawLine(
+                                color = lineColor.copy(alpha = 0.8f),
+                                start = Offset(0f, goalY),
+                                end = Offset(size.width, goalY),
+                                strokeWidth = 4f,
+                                pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(20f, 20f), 0f)
+                            )
+                            drawContext.canvas.nativeCanvas.drawText("Goal", size.width - 60f, goalY - 10f, axisPaint)
+                        }
 
                         val path = androidx.compose.ui.graphics.Path()
 
@@ -181,6 +221,34 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 )
             }
             
+            if (showGoalDialog) {
+                var goalInput by remember { mutableStateOf(if (weightGoal > 0f) weightGoal.toString() else "") }
+                AlertDialog(
+                    onDismissRequest = { showGoalDialog = false },
+                    title = { Text("Set Weight Goal") },
+                    text = {
+                        OutlinedTextField(
+                            value = goalInput,
+                            onValueChange = { goalInput = it },
+                            label = { Text("Goal (lbs)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            goalInput.toFloatOrNull()?.let {
+                                viewModel.saveWeightGoal(it)
+                            }
+                            showGoalDialog = false
+                        }) { Text("Save") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showGoalDialog = false }) { Text("Cancel") }
+                    }
+                )
+            }
+
             if (showAddDialog) {
                 var weightInput by remember { mutableStateOf("") }
                 AlertDialog(
