@@ -19,6 +19,10 @@ import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.GeminiState
 import com.example.calorietracker.ui.viewmodels.MainViewModel
 
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+
 data class MealItemInput(
     var name: String = "",
     var quantity: String = "",
@@ -40,7 +44,8 @@ fun AddMealScreen(
     val geminiState by viewModel.geminiState.collectAsState()
     val mealItems = remember { mutableStateListOf(MealItemInput()) }
     var clarificationAnswer by remember { mutableStateOf("") }
-    
+    val focusManager = LocalFocusManager.current
+
     // Reset state when leaving
     DisposableEffect(Unit) {
         onDispose { viewModel.resetGeminiState() }
@@ -58,7 +63,9 @@ fun AddMealScreen(
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = Modifier.padding(paddingValues).pointerInput(Unit) {
+            detectTapGestures(onTap = { focusManager.clearFocus() })
+        }) {
             when (val state = geminiState) {
                 is GeminiState.Idle, is GeminiState.Error -> {
                     Column(
@@ -125,8 +132,7 @@ fun AddMealScreen(
                                                     OutlinedTextField(
                                                         value = item.name,
                                                         onValueChange = { mealItems[index] = item.copy(name = it) },
-                                                        label = { Text("Item Name") },
-                                                        singleLine = true,
+                                                        label = { Text("Name") },
                                                         modifier = Modifier.weight(1.5f)
                                                     )
                                                     OutlinedTextField(
@@ -178,7 +184,6 @@ fun AddMealScreen(
                                                         value = item.name,
                                                         onValueChange = { mealItems[index] = item.copy(name = it) },
                                                         label = { Text("Item") },
-                                                        singleLine = true,
                                                         modifier = Modifier.weight(2f)
                                                     )
                                                     OutlinedTextField(

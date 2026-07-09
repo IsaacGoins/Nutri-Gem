@@ -9,11 +9,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.MainViewModel
 
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val apiKey by viewModel.apiKey.collectAsState()
     var inputKey by remember { mutableStateOf(apiKey) }
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
         topBar = {
@@ -32,6 +37,9 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }
         ) {
             Text("Gemini API Key", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))

@@ -20,7 +20,7 @@
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:debuggable="true"
-        android:extractNativeLibs="false"
+        android:extractNativeLibs="true"
         android:label="CalorieTracker"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar" >

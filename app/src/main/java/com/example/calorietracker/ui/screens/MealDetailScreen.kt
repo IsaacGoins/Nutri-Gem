@@ -5,6 +5,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -331,12 +334,12 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> Unit, onSave: (MealEntity) -> Unit) {
     BackHandler { onDismiss() }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val focusManager = LocalFocusManager.current
 
     val itemsList = try {
         Json.decodeFromString<List<GeminiItem>>(meal.itemsJson)
@@ -381,7 +384,10 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                },
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
@@ -435,7 +441,6 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                                     value = item.name,
                                     onValueChange = { editedItems[index] = item.copy(name = it) },
                                     label = { Text("Name") },
-                                    singleLine = true,
                                     modifier = Modifier.weight(1.5f)
                                 )
                                 OutlinedTextField(
@@ -534,7 +539,6 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                             value = item.name,
                             onValueChange = { aiItems[index] = item.copy(name = it) },
                             label = { Text("Item") },
-                            singleLine = true,
                             modifier = Modifier.weight(2f)
                         )
                         OutlinedTextField(

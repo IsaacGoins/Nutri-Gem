@@ -30,7 +30,7 @@
 21        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 21-->[androidx.core:core:1.13.1] /home/igoins/.gradle/caches/8.10.2/transforms/e78e2bf7da547307f84bc1acd3520676/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
 22        android:debuggable="true"
-23        android:extractNativeLibs="false"
+23        android:extractNativeLibs="true"
 24        android:label="CalorieTracker"
 24-->/home/igoins/Projects/calorie-tracker/app/src/main/AndroidManifest.xml:9:9-39
 25        android:supportsRtl="true"
