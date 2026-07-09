@@ -26,6 +26,9 @@ class MainViewModel(
     private val _apiKey = MutableStateFlow(secureStorage.getApiKey() ?: "")
     val apiKey: StateFlow<String> = _apiKey
 
+    private val _fdaApiKey = MutableStateFlow(secureStorage.getFdaApiKey() ?: "")
+    val fdaApiKey: StateFlow<String> = _fdaApiKey
+
     private val startOfDay: Long
         get() {
             val calendar = Calendar.getInstance()
@@ -53,6 +56,11 @@ class MainViewModel(
         _apiKey.value = key
     }
 
+    fun saveFdaApiKey(key: String) {
+        secureStorage.saveFdaApiKey(key)
+        _fdaApiKey.value = key
+    }
+
     fun addWater(amountOz: Int) {
         viewModelScope.launch {
             repository.addWater(WaterEntity(amountOz = amountOz, timestamp = System.currentTimeMillis()))
@@ -77,8 +85,15 @@ class MainViewModel(
         }
     }
 
-    fun analyzeMeal(prompt: String, manualItems: List<com.example.calorietracker.data.network.GeminiItem> = emptyList()) {
+    private val fdaClient = com.example.calorietracker.data.network.FdaClient()
+
+    fun analyzeMeal(
+        prompt: String, 
+        manualItems: List<com.example.calorietracker.data.network.GeminiItem> = emptyList(),
+        aiItemNames: List<String> = emptyList()
+    ) {
         val key = _apiKey.value
+        val fdaKey = _fdaApiKey.value
         if (key.isBlank()) {
             _geminiState.value = GeminiState.Error("API Key is missing. Please set it in Settings.")
             return
@@ -87,7 +102,17 @@ class MainViewModel(
         _geminiState.value = GeminiState.Loading
         viewModelScope.launch {
             try {
-                val response = geminiClient.analyzeMeal(key, prompt)
+                var finalPrompt = prompt
+                
+                // Cross-reference with FDA if API key is set
+                if (fdaKey.isNotBlank() && aiItemNames.isNotEmpty()) {
+                    val fdaContexts = aiItemNames.mapNotNull { fdaClient.searchFood(fdaKey, it) }
+                    if (fdaContexts.isNotEmpty()) {
+                        finalPrompt += "\n\nCRITICAL CONTEXT: Use the following FDA FoodData Central API data to make your macros highly accurate:\n" + fdaContexts.joinToString("\n")
+                    }
+                }
+
+                val response = geminiClient.analyzeMeal(key, finalPrompt)
                 if (response.status == "success" && response.data != null) {
                     val combinedItems = response.data.items + manualItems
                     val combinedData = response.data.copy(

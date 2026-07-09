@@ -39,7 +39,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 value = inputKey,
                 onValueChange = { inputKey = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("API Key") },
+                label = { Text("Gemini API Key") },
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -47,7 +47,29 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 onClick = { viewModel.saveApiKey(inputKey) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save")
+                Text("Save Gemini Key")
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            val fdaApiKey by viewModel.fdaApiKey.collectAsState()
+            var inputFdaKey by remember { mutableStateOf(fdaApiKey) }
+
+            Text("FDA API Key", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = inputFdaKey,
+                onValueChange = { inputFdaKey = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("FDA FoodData Central API Key") },
+                singleLine = true
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { viewModel.saveFdaApiKey(inputFdaKey) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save FDA Key")
             }
         }
     }

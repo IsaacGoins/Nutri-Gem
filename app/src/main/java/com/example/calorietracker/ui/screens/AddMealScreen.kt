@@ -270,7 +270,7 @@ fun AddMealScreen(
                                 } else if (aiItems.isNotEmpty()) {
                                     val prompt = "Calculate macros for the following meal:\n" +
                                             aiItems.joinToString("\n") { "${it.quantity} ${it.unit} of ${it.name}" }
-                                    viewModel.analyzeMeal(prompt, manualItems)
+                                    viewModel.analyzeMeal(prompt, manualItems, aiItems.map { it.name })
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -308,10 +308,20 @@ fun AddMealScreen(
                         },
                         confirmButton = {
                             TextButton(onClick = {
+                                val aiItems = mealItems.filter { !it.isManual }
+                                val manualItems = mealItems.filter { it.isManual }.map {
+                                    com.example.calorietracker.data.network.GeminiItem(
+                                        name = it.name.ifBlank { "Custom Item" },
+                                        calories = it.calories.toIntOrNull() ?: 0,
+                                        protein_g = it.proteinG.toIntOrNull() ?: 0,
+                                        carbs_g = it.carbsG.toIntOrNull() ?: 0,
+                                        fat_g = it.fatG.toIntOrNull() ?: 0
+                                    )
+                                }
                                 val prompt = "Calculate macros for the following meal:\n" +
-                                        mealItems.joinToString("\n") { "${it.quantity} ${it.unit} of ${it.name}" } +
+                                        aiItems.joinToString("\n") { "${it.quantity} ${it.unit} of ${it.name}" } +
                                         "\nClarification: $clarificationAnswer"
-                                viewModel.analyzeMeal(prompt)
+                                viewModel.analyzeMeal(prompt, manualItems, aiItems.map { it.name })
                             }) {
                                 Text("Submit")
                             }

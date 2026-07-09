@@ -25,4 +25,12 @@ class SecureStorage(context: Context) {
     fun getApiKey(): String? {
         return sharedPreferences.getString("API_KEY", null)
     }
+
+    fun saveFdaApiKey(key: String) {
+        sharedPreferences.edit().putString("FDA_API_KEY", key).apply()
+    }
+
+    fun getFdaApiKey(): String? {
+        return sharedPreferences.getString("FDA_API_KEY", null)
+    }
 }
