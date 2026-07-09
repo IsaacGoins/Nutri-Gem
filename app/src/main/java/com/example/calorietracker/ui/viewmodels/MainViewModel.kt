@@ -70,6 +70,38 @@ class MainViewModel(
         _weightGoal.value = weight
     }
 
+    private val _age = MutableStateFlow(secureStorage.getAge())
+    val age: StateFlow<Int> = _age
+
+    private val _heightInches = MutableStateFlow(secureStorage.getHeight())
+    val heightInches: StateFlow<Int> = _heightInches
+
+    private val _workoutsPerWeek = MutableStateFlow(secureStorage.getWorkoutsPerWeek())
+    val workoutsPerWeek: StateFlow<Int> = _workoutsPerWeek
+
+    private val _activeDays = MutableStateFlow(secureStorage.getActiveDays())
+    val activeDays: StateFlow<String> = _activeDays
+
+    fun saveAge(age: Int) {
+        secureStorage.saveAge(age)
+        _age.value = age
+    }
+
+    fun saveHeight(height: Int) {
+        secureStorage.saveHeight(height)
+        _heightInches.value = height
+    }
+
+    fun saveWorkoutsPerWeek(count: Int) {
+        secureStorage.saveWorkoutsPerWeek(count)
+        _workoutsPerWeek.value = count
+    }
+
+    fun saveActiveDays(days: String) {
+        secureStorage.saveActiveDays(days)
+        _activeDays.value = days
+    }
+
     fun addWater(amountOz: Int) {
         viewModelScope.launch {
             repository.addWater(WaterEntity(amountOz = amountOz, timestamp = System.currentTimeMillis()))
@@ -281,6 +313,81 @@ class MainViewModel(
                 data = data
             )
         )
+    }
+
+    val allScores = repository.getAllScores().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private val _isScoring = MutableStateFlow(false)
+    val isScoring: StateFlow<Boolean> = _isScoring
+    
+    fun generateScoreForYesterday(force: Boolean = false) {
+        val key = _apiKey.value
+        if (key.isBlank()) return
+        
+        viewModelScope.launch {
+            _isScoring.value = true
+            try {
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                val startOfToday = calendar.timeInMillis
+                calendar.add(Calendar.DAY_OF_YEAR, -1)
+                val startOfYesterday = calendar.timeInMillis
+                
+                if (!force) {
+                    val existing = allScores.value.find { it.dateTimestamp == startOfYesterday }
+                    if (existing != null) {
+                        _isScoring.value = false
+                        return@launch
+                    }
+                }
+                
+                val yesterdaysMeals = allMeals.value.filter { it.timestamp in startOfYesterday until startOfToday }
+                val yesterdaysWater = allWater.value.filter { it.timestamp in startOfYesterday until startOfToday }
+                
+                if (yesterdaysMeals.isEmpty() && yesterdaysWater.isEmpty()) {
+                    _isScoring.value = false
+                    return@launch 
+                }
+                
+                calendar.add(Calendar.DAY_OF_YEAR, -1)
+                val dayBeforeYesterday = calendar.timeInMillis
+                val prevScore = allScores.value.find { it.dateTimestamp == dayBeforeYesterday }
+                
+                val mealsJsonArray = yesterdaysMeals.joinToString(",") { 
+                    "{\"name\": \"${it.name.replace("\"", "\\\"")}\", \"calories\": ${it.calories}, \"protein\": ${it.proteinG}, \"carbs\": ${it.carbsG}, \"fat\": ${it.fatG}, \"timestamp\": ${it.timestamp}}" 
+                }
+                
+                val payloadJson = """
+                {
+                  "profile": { "age": ${age.value}, "heightInches": ${heightInches.value}, "weightGoalLbs": ${weightGoal.value}, "workoutsPerWeek": ${workoutsPerWeek.value}, "activeDays": "${activeDays.value}" },
+                  "yesterdaysMeals": [$mealsJsonArray],
+                  "yesterdaysWaterOz": ${yesterdaysWater.sumOf { it.amountOz }},
+                  "previousDayOverallScore": ${prevScore?.overallScore ?: -1}
+                }
+                """.trimIndent()
+                
+                val scoreResponse = geminiClient.generateDailyScore(key, payloadJson)
+                
+                val scoreEntity = com.example.calorietracker.data.local.DailyScoreEntity(
+                    dateTimestamp = startOfYesterday,
+                    overallScore = scoreResponse.overallScore,
+                    cleanScore = scoreResponse.cleanScore,
+                    macroScore = scoreResponse.macroScore,
+                    calorieScore = scoreResponse.calorieScore,
+                    waterScore = scoreResponse.waterScore,
+                    balanceScore = scoreResponse.balanceScore,
+                    feedback = scoreResponse.feedback
+                )
+                
+                repository.addScore(scoreEntity)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isScoring.value = false
+            }
+        }
     }
 }
 

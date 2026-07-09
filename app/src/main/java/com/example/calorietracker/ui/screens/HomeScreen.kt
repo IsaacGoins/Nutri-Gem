@@ -29,7 +29,8 @@ fun HomeScreen(
     onNavigateToMeals: () -> Unit,
     onNavigateToWater: () -> Unit,
     onNavigateToWeight: () -> Unit,
-    onNavigateToAddMeal: () -> Unit
+    onNavigateToAddMeal: () -> Unit,
+    onNavigateToScore: () -> Unit
 ) {
     val calories by viewModel.caloriesForDay.collectAsState()
     val protein by viewModel.proteinForDay.collectAsState()
@@ -37,9 +38,14 @@ fun HomeScreen(
     val fat by viewModel.fatForDay.collectAsState()
     val water by viewModel.waterForDay.collectAsState()
     
-    // We can show the most recent weight
     val weightLogs by viewModel.allWeight.collectAsState()
     val currentWeight = weightLogs.firstOrNull()?.weightLbs ?: 0f
+
+    val scores by viewModel.allScores.collectAsState()
+    
+    LaunchedEffect(Unit) {
+        viewModel.generateScoreForYesterday()
+    }
 
     Scaffold(
         topBar = {
@@ -62,6 +68,12 @@ fun HomeScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Score Banner
+                if (scores.isNotEmpty()) {
+                    val latestScore = scores.first()
+                    ScoreBanner(score = latestScore.overallScore, onClick = onNavigateToScore)
+                }
+
                 HeroSection(
                     calories = calories ?: 0,
                     protein = protein ?: 0,
@@ -74,10 +86,33 @@ fun HomeScreen(
                 
                 WeightBanner(weight = currentWeight, onClick = onNavigateToWeight)
             }
-
         }
     }
 }
+
+@Composable
+fun ScoreBanner(score: Int, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+    ) {
+        Row(
+            modifier = Modifier.padding(24.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("Yesterday's Score", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                Text("View Insights", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
+            }
+            Text("$score/100", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer)
+        }
+    }
+}
+
 
 @Composable
 fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, onClick: () -> Unit) {

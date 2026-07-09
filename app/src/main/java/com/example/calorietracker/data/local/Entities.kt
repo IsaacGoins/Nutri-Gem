@@ -28,3 +28,15 @@ data class WeightEntity(
     val weightLbs: Float,
     val timestamp: Long
 )
+
+@Entity(tableName = "daily_scores")
+data class DailyScoreEntity(
+    @PrimaryKey val dateTimestamp: Long, // Start of day timestamp
+    val overallScore: Int,
+    val cleanScore: Int,
+    val macroScore: Int,
+    val calorieScore: Int,
+    val waterScore: Int,
+    val balanceScore: Int,
+    val feedback: String
+)

@@ -78,7 +78,8 @@ fun AppNavigation() {
                     onNavigateToMeals = { navController.navigate("meals") },
                     onNavigateToWater = { navController.navigate("water") },
                     onNavigateToWeight = { navController.navigate("weight_detail") },
-                    onNavigateToAddMeal = { navController.navigate("add_meal") }
+                    onNavigateToAddMeal = { navController.navigate("add_meal") },
+                    onNavigateToScore = { navController.navigate("score_detail") }
                 )
             }
             composable("settings") {
@@ -102,6 +103,12 @@ fun AppNavigation() {
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
                     onSaveComplete = { navController.popBackStack() }
+                )
+            }
+            composable("score_detail") {
+                ScoreDetailScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

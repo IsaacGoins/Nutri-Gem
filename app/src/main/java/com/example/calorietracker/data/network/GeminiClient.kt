@@ -14,6 +14,17 @@ data class GeminiResponse(
 )
 
 @Serializable
+data class DailyScoreResponse(
+    val overallScore: Int,
+    val cleanScore: Int,
+    val macroScore: Int,
+    val calorieScore: Int,
+    val waterScore: Int,
+    val balanceScore: Int,
+    val feedback: String
+)
+
+@Serializable
 data class GeminiData(
     var meal_name: String = "",
     var fda_search_term: String = "",
@@ -110,6 +121,37 @@ class GeminiClient {
         
         val rawText = response.text?.trim()?.removePrefix("```json")?.removePrefix("```")?.removeSuffix("```")?.trim() ?: "{}"
         
+        return json.decodeFromString(rawText)
+    }
+
+    suspend fun generateDailyScore(apiKey: String, payload: String): DailyScoreResponse {
+        val config = com.google.ai.client.generativeai.type.generationConfig {
+            responseMimeType = "application/json"
+        }
+
+        val generativeModel = GenerativeModel(
+            modelName = "gemini-3.1-flash-lite",
+            apiKey = apiKey,
+            generationConfig = config,
+            systemInstruction = com.google.ai.client.generativeai.type.content {
+                text("You are an elite nutritionist AI calculating a 'Daily Nutrition Score' (1-100) for a user.\n" +
+                     "The user will provide a JSON payload of their Profile (age, height, weight goal, activity level), yesterday's Meals, and yesterday's Water intake.\n" +
+                     "Return a JSON object matching this exact schema (no markdown, just JSON):\n" +
+                     "{\n" +
+                     "  \"overallScore\": 85,\n" +
+                     "  \"cleanScore\": 90,\n" +
+                     "  \"macroScore\": 80,\n" +
+                     "  \"calorieScore\": 85,\n" +
+                     "  \"waterScore\": 100,\n" +
+                     "  \"balanceScore\": 75,\n" +
+                     "  \"feedback\": \"Your short customized paragraph explaining the score and comparing it to the previous day if provided in the payload...\"\n" +
+                     "}\n" +
+                     "Be strict but fair. Estimate their TDEE using their profile to judge calorieScore. Analyze meal items for cleanScore (e.g. processed vs whole foods). Evaluate balanceScore based on how they spread their food.")
+            }
+        )
+
+        val response = generativeModel.generateContent(payload)
+        val rawText = response.text?.trim()?.removePrefix("```json")?.removePrefix("```")?.removeSuffix("```")?.trim() ?: "{}"
         return json.decodeFromString(rawText)
     }
 }

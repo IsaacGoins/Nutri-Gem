@@ -51,4 +51,13 @@ interface HealthDao {
 
     @Query("SELECT * FROM weight_log ORDER BY timestamp DESC")
     fun getAllWeight(): Flow<List<WeightEntity>>
+
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    suspend fun insertScore(score: DailyScoreEntity)
+
+    @Query("SELECT * FROM daily_scores ORDER BY dateTimestamp DESC")
+    fun getAllScores(): Flow<List<DailyScoreEntity>>
+
+    @Query("SELECT * FROM daily_scores WHERE dateTimestamp = :date LIMIT 1")
+    suspend fun getScoreForDate(date: Long): DailyScoreEntity?
 }

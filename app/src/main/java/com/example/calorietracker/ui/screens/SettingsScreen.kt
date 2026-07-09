@@ -79,6 +79,67 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             ) {
                 Text("Save FDA Key")
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            val age by viewModel.age.collectAsState()
+            val height by viewModel.heightInches.collectAsState()
+            val workouts by viewModel.workoutsPerWeek.collectAsState()
+            val activeDays by viewModel.activeDays.collectAsState()
+
+            var inputAge by remember { mutableStateOf(age.toString()) }
+            var inputHeight by remember { mutableStateOf(height.toString()) }
+            var inputWorkouts by remember { mutableStateOf(workouts.toString()) }
+            var inputActiveDays by remember { mutableStateOf(activeDays) }
+
+            Text("Personal Profile (For AI Scoring)", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = inputAge,
+                    onValueChange = { inputAge = it },
+                    label = { Text("Age") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+                OutlinedTextField(
+                    value = inputHeight,
+                    onValueChange = { inputHeight = it },
+                    label = { Text("Height (inches)") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = inputWorkouts,
+                    onValueChange = { inputWorkouts = it },
+                    label = { Text("Workouts / Week") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+                OutlinedTextField(
+                    value = inputActiveDays,
+                    onValueChange = { inputActiveDays = it },
+                    label = { Text("Active Days") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { 
+                    viewModel.saveAge(inputAge.toIntOrNull() ?: 30)
+                    viewModel.saveHeight(inputHeight.toIntOrNull() ?: 68)
+                    viewModel.saveWorkoutsPerWeek(inputWorkouts.toIntOrNull() ?: 3)
+                    viewModel.saveActiveDays(inputActiveDays)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save Profile")
+            }
         }
     }
 }
