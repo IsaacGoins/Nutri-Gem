@@ -86,12 +86,36 @@ fun AddMealScreen(
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         modifier = Modifier.weight(1f)
                                     )
-                                    OutlinedTextField(
-                                        value = item.unit,
-                                        onValueChange = { mealItems[index] = item.copy(unit = it) },
-                                        label = { Text("Unit") },
-                                        modifier = Modifier.weight(1f)
-                                    )
+                                    var expanded by remember { mutableStateOf(false) }
+                                    val unitOptions = listOf("g", "oz", "cups", "tbsp", "tsp", "ml", "pieces")
+
+                                    ExposedDropdownMenuBox(
+                                        expanded = expanded,
+                                        onExpandedChange = { expanded = !expanded },
+                                        modifier = Modifier.weight(1.5f)
+                                    ) {
+                                        OutlinedTextField(
+                                            value = item.unit,
+                                            onValueChange = { mealItems[index] = item.copy(unit = it) },
+                                            label = { Text("Unit") },
+                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                            modifier = Modifier.menuAnchor()
+                                        )
+                                        ExposedDropdownMenu(
+                                            expanded = expanded,
+                                            onDismissRequest = { expanded = false }
+                                        ) {
+                                            unitOptions.forEach { option ->
+                                                DropdownMenuItem(
+                                                    text = { Text(option) },
+                                                    onClick = {
+                                                        mealItems[index] = item.copy(unit = option)
+                                                        expanded = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
                                     IconButton(onClick = { if (mealItems.size > 1) mealItems.removeAt(index) }) {
                                         Icon(Icons.Default.Delete, contentDescription = "Remove")
                                     }

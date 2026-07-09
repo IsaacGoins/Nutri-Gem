@@ -34,7 +34,7 @@
     <string msgid="7813882352367152251" name="m3c_date_picker_scroll_to_earlier_years">"برای نمایش سال‌های قبل پیمایش کنید"</string>
     <string msgid="5727367015496556177" name="m3c_date_picker_scroll_to_later_years">"برای نمایش سال‌های بعد پیمایش کنید"</string>
     <string msgid="1804346892470238807" name="m3c_date_picker_switch_to_calendar_mode">"رفتن به روش ورودی تقویم"</string>
-    <string msgid="395627960681594326" name="m3c_date_picker_switch_to_day_selection">"برای انتخاب سال، تند بکشید یا برای برگشتن به انتخاب روز، ضربه بزنید"</string>
+    <string msgid="395627960681594326" name="m3c_date_picker_switch_to_day_selection">"برای انتخاب سال، تند بکشید یا برای برگشتن به انتخاب روز، تک‌ضرب بزنید"</string>
     <string msgid="2219746470065162704" name="m3c_date_picker_switch_to_input_mode">"رفتن به حالت ورودی نوشتاری"</string>
     <string msgid="7142101321095356500" name="m3c_date_picker_switch_to_next_month">"تغییر به ماه بعدی"</string>
     <string msgid="228438865139394590" name="m3c_date_picker_switch_to_previous_month">"تغییر به ماه قبلی"</string>
@@ -53,8 +53,10 @@
     <string msgid="7617233117134790350" name="m3c_dialog">"کادر گفتگو"</string>
     <string msgid="3177828188723359358" name="m3c_dropdown_menu_collapsed">"جمع شد"</string>
     <string msgid="2360841780724299882" name="m3c_dropdown_menu_expanded">"ازهم باز شد"</string>
+    <string msgid="8687821690726149911" name="m3c_dropdown_menu_toggle">"جمع کردن/ ازهم باز کردن منوِ کرکره‌ای"</string>
     <string msgid="6152806324422087846" name="m3c_search_bar_search">"جستجو"</string>
     <string msgid="6152755701819882931" name="m3c_snackbar_dismiss">"بستن"</string>
+    <string msgid="3868801555855510515" name="m3c_snackbar_pane_title">"هشدار"</string>
     <string msgid="7655536806087401899" name="m3c_suggestions_available">"پیشنهادهای زیر"</string>
     <string msgid="2786685010796619560" name="m3c_time_picker_am">"ق.ظ."</string>
     <string msgid="2349193472625211372" name="m3c_time_picker_hour">"ساعت"</string>
@@ -70,13 +72,16 @@
     <string msgid="6616362054113087709" name="m3c_time_picker_pm">"ب.ظ."</string>
     <string msgid="1805687647081129904" name="m3c_tooltip_long_press_label">"نمایش نکته‌ابزار"</string>
     <string msgid="5460405025248574620" name="m3c_tooltip_pane_description">"نکته‌ابزار"</string>
+    <string msgid="6564222473543418073" name="m3c_wide_navigation_rail_close_rail">"بستن ریل"</string>
+    <string msgid="8350283435461615411" name="m3c_wide_navigation_rail_pane_title">"ریل پیمایش"</string>
     <string msgid="542007171693138492" name="navigation_menu">"منوی پیمایش"</string>
     <string msgid="6610465462668679431" name="not_selected">"انتخاب‌نشده"</string>
-    <string msgid="875452955155264703" name="off">"خاموش"</string>
-    <string msgid="8655164131929253426" name="on">"روشن"</string>
     <string msgid="5941395253238309765" name="range_end">"پایان محدوده"</string>
     <string msgid="7097486360902471446" name="range_start">"شروع محدوده"</string>
     <string msgid="6043586758067023" name="selected">"انتخاب شد"</string>
+    <string msgid="4139871816613051306" name="state_empty">"خالی"</string>
+    <string msgid="5834637030682409883" name="state_off">"خاموش"</string>
+    <string msgid="1490883874751719580" name="state_on">"روشن"</string>
     <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
     <string msgid="2561197295334830845" name="switch_role">"کلید"</string>
     <string msgid="1672349317127674378" name="tab">"برگه"</string>

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.calorietracker.app-mergeDebugResources-54:/values-v21/values-v21.xml",
+            "outputFile": "com.example.calorietracker.app-mergeDebugResources-57:/values-v21/values-v21.xml",
             "map": [
                 {
-                    "source": "/home/igoins/.gradle/caches/8.10.2/transforms/0e1fbf14341474aecf4891e0a02b41d8/transformed/core-1.12.0/res/values-v21/values-v21.xml",
+                    "source": "/home/igoins/.gradle/caches/8.10.2/transforms/e78e2bf7da547307f84bc1acd3520676/transformed/core-1.13.1/res/values-v21/values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,13",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",

@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.MainViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
@@ -37,6 +37,40 @@ fun HomeScreen(
     val water by viewModel.waterForDay.collectAsState()
 
     var waterDialExpanded by remember { mutableStateOf(false) }
+    var showCustomWaterDialog by remember { mutableStateOf(false) }
+    var customWaterAmount by remember { mutableStateOf("") }
+
+    if (showCustomWaterDialog) {
+        AlertDialog(
+            onDismissRequest = { showCustomWaterDialog = false },
+            title = { Text("Custom Amount") },
+            text = {
+                OutlinedTextField(
+                    value = customWaterAmount,
+                    onValueChange = { customWaterAmount = it },
+                    label = { Text("Amount (oz)") },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val amount = customWaterAmount.toIntOrNull()
+                    if (amount != null && amount > 0) {
+                        viewModel.addWater(amount)
+                    }
+                    showCustomWaterDialog = false
+                    customWaterAmount = ""
+                }) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCustomWaterDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -51,25 +85,32 @@ fun HomeScreen(
         },
         floatingActionButton = {
             Row(verticalAlignment = Alignment.Bottom) {
-                // Water Speed Dial using custom Compose state since standard API might require specific imports
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (waterDialExpanded) {
-                        SmallFloatingActionButton(onClick = { viewModel.addWater(8); waterDialExpanded = false }) {
-                            Text("+8oz")
+                FloatingActionButtonMenu(
+                    expanded = waterDialExpanded,
+                    button = {
+                        ToggleFloatingActionButton(
+                            checked = waterDialExpanded,
+                            onCheckedChange = { waterDialExpanded = it }
+                        ) {
+                            Icon(Icons.Default.LocalDrink, contentDescription = "Add Water")
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        SmallFloatingActionButton(onClick = { viewModel.addWater(16); waterDialExpanded = false }) {
-                            Text("+16oz")
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        SmallFloatingActionButton(onClick = { /* TODO Custom Dialog */ waterDialExpanded = false }) {
-                            Text("...")
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                    FloatingActionButton(onClick = { waterDialExpanded = !waterDialExpanded }) {
-                        Icon(Icons.Default.LocalDrink, contentDescription = "Add Water")
-                    }
+                ) {
+                    FloatingActionButtonMenuItem(
+                        onClick = { viewModel.addWater(8); waterDialExpanded = false },
+                        icon = { Icon(Icons.Default.LocalDrink, contentDescription = null) },
+                        text = { Text("+8oz") }
+                    )
+                    FloatingActionButtonMenuItem(
+                        onClick = { viewModel.addWater(16); waterDialExpanded = false },
+                        icon = { Icon(Icons.Default.LocalDrink, contentDescription = null) },
+                        text = { Text("+16oz") }
+                    )
+                    FloatingActionButtonMenuItem(
+                        onClick = { showCustomWaterDialog = true; waterDialExpanded = false },
+                        icon = { Icon(Icons.Default.LocalDrink, contentDescription = null) },
+                        text = { Text("Custom") }
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 FloatingActionButton(onClick = onNavigateToAddMeal, containerColor = MaterialTheme.colorScheme.primaryContainer) {
