@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.MainViewModel
@@ -66,41 +67,6 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Main Score Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Overall Score", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onTertiaryContainer)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "${latestScore.overallScore}",
-                            style = MaterialTheme.typography.displayLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                        Text("/ 100", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
-                    }
-                }
-
-                // AI Feedback
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("AI Feedback", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(latestScore.feedback, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-
-                // Breakdown
                 Text("Score Breakdown", style = MaterialTheme.typography.titleLarge)
                 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -113,7 +79,19 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 }
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     ScoreRingCard(title = "Meal Balance", score = latestScore.balanceScore, modifier = Modifier.weight(1f))
-                    Spacer(modifier = Modifier.weight(1f)) // Empty spacer for grid alignment
+                    ScoreRingCard(title = "Overall Score", score = latestScore.overallScore, modifier = Modifier.weight(1f), isOverall = true)
+                }
+
+                // AI Feedback
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("AI Feedback", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(latestScore.feedback, style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
 
                 // History Graph
@@ -134,20 +112,23 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier) {
+fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOverall: Boolean = false) {
+    val containerColor = if (isOverall) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (isOverall) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface
+    
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = textColor)
             Spacer(modifier = Modifier.height(16.dp))
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
-                val primaryColor = MaterialTheme.colorScheme.tertiary
-                val trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                val primaryColor = if (isOverall) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                val trackColor = primaryColor.copy(alpha = 0.2f)
                 
                 Canvas(modifier = Modifier.size(80.dp)) {
                     drawArc(
@@ -157,15 +138,22 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier) {
                         useCenter = false,
                         style = Stroke(width = 12f, cap = StrokeCap.Round)
                     )
-                    drawArc(
-                        color = primaryColor,
-                        startAngle = -90f,
-                        sweepAngle = (score / 100f) * 360f,
-                        useCenter = false,
-                        style = Stroke(width = 12f, cap = StrokeCap.Round)
-                    )
+                    if (score >= 0) {
+                        drawArc(
+                            color = primaryColor,
+                            startAngle = -90f,
+                            sweepAngle = (score / 100f) * 360f,
+                            useCenter = false,
+                            style = Stroke(width = 12f, cap = StrokeCap.Round)
+                        )
+                    }
                 }
-                Text("$score", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = if (score >= 0) "$score" else "X",
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
             }
         }
     }
@@ -174,21 +162,51 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier) {
 @Composable
 fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailyScoreEntity>) {
     if (scores.isEmpty()) return
-    val sortedScores = scores.sortedBy { it.dateTimestamp }
+    val sortedScores = scores.sortedBy { it.dateTimestamp }.takeLast(7)
     val maxScore = 100f
     
     val lineColor = MaterialTheme.colorScheme.tertiary
     
-    Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        val width = size.width
-        val height = size.height
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val padding = 20f
+        val bottomPadding = 60f
+        val topPadding = 40f
         
-        val pointSpacing = if (sortedScores.size > 1) width / (sortedScores.size - 1) else width
+        val width = size.width - padding * 2
+        val height = size.height - topPadding - bottomPadding
+        
+        val startX = padding + 60f 
+        val startY = topPadding
+        
+        val gridColor = Color.Gray.copy(alpha = 0.3f)
+        val textPaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.GRAY
+            textSize = 35f
+        }
+        
+        // Y-axis grid & labels
+        drawLine(gridColor, start = Offset(startX, startY), end = Offset(size.width - padding, startY))
+        drawContext.canvas.nativeCanvas.drawText("100", padding, startY + 10f, textPaint)
+        
+        drawLine(gridColor, start = Offset(startX, startY + height / 2), end = Offset(size.width - padding, startY + height / 2))
+        drawContext.canvas.nativeCanvas.drawText("50", padding, startY + height / 2 + 10f, textPaint)
+        
+        drawLine(gridColor, start = Offset(startX, startY + height), end = Offset(size.width - padding, startY + height))
+        drawContext.canvas.nativeCanvas.drawText("0", padding, startY + height + 10f, textPaint)
+        
+        val graphWidth = size.width - padding - startX
+        val pointSpacing = if (sortedScores.size > 1) graphWidth / (sortedScores.size - 1) else graphWidth / 2
         
         val points = sortedScores.mapIndexed { index, score ->
-            val x = index * pointSpacing
-            val y = height - ((score.overallScore / maxScore) * height)
+            val x = startX + (if (sortedScores.size > 1) index * pointSpacing else graphWidth / 2)
+            val y = startY + height - ((score.overallScore / maxScore) * height)
             Offset(x, y)
+        }
+        
+        val timeFormat = java.text.SimpleDateFormat("MM/dd", java.util.Locale.getDefault())
+        points.forEachIndexed { index, point ->
+            val dateText = timeFormat.format(java.util.Date(sortedScores[index].dateTimestamp))
+            drawContext.canvas.nativeCanvas.drawText(dateText, point.x - 30f, startY + height + 50f, textPaint)
         }
         
         for (i in 0 until points.size - 1) {
