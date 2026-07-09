@@ -26,6 +26,28 @@ import com.example.calorietracker.ui.viewmodels.MainViewModel
 fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val scores by viewModel.allScores.collectAsState()
     val isScoring by viewModel.isScoring.collectAsState()
+    var showRegenerateDialog by remember { mutableStateOf(false) }
+
+    if (showRegenerateDialog) {
+        AlertDialog(
+            onDismissRequest = { showRegenerateDialog = false },
+            title = { Text("Regenerate Score?") },
+            text = { Text("This will recalculate your score based on your current logs. Are you sure?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRegenerateDialog = false
+                    viewModel.generateScoreForYesterday(force = true)
+                }) {
+                    Text("Regenerate")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRegenerateDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -37,7 +59,7 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.generateScoreForYesterday(force = true) }) {
+                    IconButton(onClick = { showRegenerateDialog = true }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Regenerate")
                     }
                 }
