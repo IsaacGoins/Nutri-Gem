@@ -51,7 +51,8 @@ data class GeminiItem(
     var calories: Int,
     var protein_g: Int = 0,
     var carbs_g: Int = 0,
-    var fat_g: Int = 0
+    var fat_g: Int = 0,
+    var isFdaVerified: Boolean = false
 )
 
 class GeminiClient {

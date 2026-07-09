@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -379,13 +380,24 @@ fun AddMealScreen(
                                 itemsIndexed(editedItems) { index, item ->
                                     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                                         Column(modifier = Modifier.padding(8.dp)) {
-                                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                                 OutlinedTextField(
                                                     value = item.name,
                                                     onValueChange = { editedItems[index] = item.copy(name = it) },
                                                     label = { Text("Name") },
                                                     modifier = Modifier.weight(1.5f)
                                                 )
+                                                if (item.isFdaVerified) {
+                                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.CheckCircle,
+                                                            contentDescription = "FDA Verified",
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.size(20.dp)
+                                                        )
+                                                        Text("FDA", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                                                    }
+                                                }
                                                 OutlinedTextField(
                                                     value = if (item.calories == 0) "" else item.calories.toString(),
                                                     onValueChange = { editedItems[index] = item.copy(calories = it.toIntOrNull() ?: 0) },

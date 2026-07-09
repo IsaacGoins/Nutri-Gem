@@ -146,7 +146,8 @@ class MainViewModel(
                                     calories = fdaData.calories,
                                     protein_g = fdaData.protein,
                                     carbs_g = fdaData.carbs,
-                                    fat_g = fdaData.fat
+                                    fat_g = fdaData.fat,
+                                    isFdaVerified = true
                                 )
                             )
                             mealResolved = true
@@ -162,7 +163,8 @@ class MainViewModel(
                                     calories = data.total_calories,
                                     protein_g = 0, // Fallback macros are rough
                                     carbs_g = 0,
-                                    fat_g = 0
+                                    fat_g = 0,
+                                    isFdaVerified = false
                                 )
                             )
                         } else {
@@ -180,7 +182,8 @@ class MainViewModel(
                                                 calories = fdaData.calories,
                                                 protein_g = fdaData.protein,
                                                 carbs_g = fdaData.carbs,
-                                                fat_g = fdaData.fat
+                                                fat_g = fdaData.fat,
+                                                isFdaVerified = true
                                             )
                                         )
                                         ingredientResolved = true
@@ -195,7 +198,8 @@ class MainViewModel(
                                             calories = ingredient.estimated_macros.calories,
                                             protein_g = ingredient.estimated_macros.protein_g,
                                             carbs_g = ingredient.estimated_macros.carbs_g,
-                                            fat_g = ingredient.estimated_macros.fat_g
+                                            fat_g = ingredient.estimated_macros.fat_g,
+                                            isFdaVerified = false
                                         )
                                     )
                                 }
