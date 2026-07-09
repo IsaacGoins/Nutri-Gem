@@ -346,6 +346,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
     } catch(e: Exception) { emptyList() }
     
     var editedMealName by remember { mutableStateOf(meal.name) }
+    var editedTimestamp by remember { mutableStateOf(meal.timestamp) }
     val editedItems = remember { mutableStateListOf(*itemsList.map { it.copy() }.toTypedArray()) }
     
     val scope = rememberCoroutineScope()
@@ -366,6 +367,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                     TextButton(onClick = {
                         val updatedMeal = meal.copy(
                             name = editedMealName,
+                            timestamp = editedTimestamp,
                             calories = editedItems.sumOf { it.calories },
                             proteinG = editedItems.sumOf { it.protein_g },
                             carbsG = editedItems.sumOf { it.carbs_g },
@@ -397,6 +399,59 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                     label = { Text("Meal Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                var showDatePicker by remember { mutableStateOf(false) }
+                var showTimePicker by remember { mutableStateOf(false) }
+                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = editedTimestamp)
+                val timePickerState = rememberTimePickerState(
+                    initialHour = SimpleDateFormat("HH", Locale.getDefault()).format(Date(editedTimestamp)).toInt(),
+                    initialMinute = SimpleDateFormat("mm", Locale.getDefault()).format(Date(editedTimestamp)).toInt()
+                )
+
+                if (showDatePicker) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showDatePicker = false
+                                showTimePicker = true
+                            }) { Text("Next") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+
+                if (showTimePicker) {
+                    AlertDialog(
+                        onDismissRequest = { showTimePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                showTimePicker = false
+                                val calendar = java.util.Calendar.getInstance()
+                                calendar.timeInMillis = datePickerState.selectedDateMillis ?: editedTimestamp
+                                calendar.set(java.util.Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                calendar.set(java.util.Calendar.MINUTE, timePickerState.minute)
+                                editedTimestamp = calendar.timeInMillis
+                            }) { Text("Confirm") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+                        },
+                        text = { TimePicker(state = timePickerState) }
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Time: " + SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(editedTimestamp)))
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
             

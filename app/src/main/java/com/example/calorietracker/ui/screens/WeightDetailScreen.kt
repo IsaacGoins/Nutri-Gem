@@ -65,7 +65,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
-                Text("Add Weight")
+                Text("Log Weight")
             }
         }
     ) { paddingValues ->

@@ -345,6 +345,7 @@ fun AddMealScreen(
                     val data = state.response.data
                     if (data != null) {
                         var editedMealName by remember { mutableStateOf(data.meal_name) }
+                        var editedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
                         val editedItems = remember { mutableStateListOf(*data.items.map { it.copy() }.toTypedArray()) }
                         
                         val totalCalories = editedItems.sumOf { it.calories }
@@ -366,6 +367,60 @@ fun AddMealScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(16.dp))
+                            
+                            var showDatePicker by remember { mutableStateOf(false) }
+                            var showTimePicker by remember { mutableStateOf(false) }
+                            val datePickerState = rememberDatePickerState(initialSelectedDateMillis = editedTimestamp)
+                            val timePickerState = rememberTimePickerState(
+                                initialHour = java.text.SimpleDateFormat("HH", java.util.Locale.getDefault()).format(java.util.Date(editedTimestamp)).toInt(),
+                                initialMinute = java.text.SimpleDateFormat("mm", java.util.Locale.getDefault()).format(java.util.Date(editedTimestamp)).toInt()
+                            )
+
+                            if (showDatePicker) {
+                                DatePickerDialog(
+                                    onDismissRequest = { showDatePicker = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            showDatePicker = false
+                                            showTimePicker = true
+                                        }) { Text("Next") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                                    }
+                                ) {
+                                    DatePicker(state = datePickerState)
+                                }
+                            }
+
+                            if (showTimePicker) {
+                                AlertDialog(
+                                    onDismissRequest = { showTimePicker = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            showTimePicker = false
+                                            val calendar = java.util.Calendar.getInstance()
+                                            calendar.timeInMillis = datePickerState.selectedDateMillis ?: editedTimestamp
+                                            calendar.set(java.util.Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                            calendar.set(java.util.Calendar.MINUTE, timePickerState.minute)
+                                            editedTimestamp = calendar.timeInMillis
+                                        }) { Text("Confirm") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+                                    },
+                                    text = { TimePicker(state = timePickerState) }
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { showDatePicker = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Time: " + java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date(editedTimestamp)))
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("Calories: $totalCalories", style = MaterialTheme.typography.titleMedium)
                                 Text("Protein: ${totalProtein}g", style = MaterialTheme.typography.titleMedium)
@@ -516,7 +571,7 @@ fun AddMealScreen(
                                     data.macros.carbs_g = totalCarbs
                                     data.macros.fat_g = totalFat
                                     data.items = editedItems.toList()
-                                    viewModel.saveMeal(state.response)
+                                    viewModel.saveMeal(state.response, editedTimestamp)
                                     onSaveComplete()
                                 }) {
                                     Text("Save Meal")

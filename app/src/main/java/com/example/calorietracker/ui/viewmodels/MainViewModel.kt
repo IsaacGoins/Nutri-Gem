@@ -114,6 +114,12 @@ class MainViewModel(
         }
     }
 
+    fun updateWater(water: WaterEntity) {
+        viewModelScope.launch {
+            repository.updateWater(water)
+        }
+    }
+
     fun addWeight(weightLbs: Float) {
         viewModelScope.launch {
             repository.addWeight(com.example.calorietracker.data.local.WeightEntity(weightLbs = weightLbs, timestamp = System.currentTimeMillis()))
@@ -283,7 +289,7 @@ class MainViewModel(
         }
     }
 
-    fun saveMeal(response: GeminiResponse) {
+    fun saveMeal(response: GeminiResponse, timestamp: Long = System.currentTimeMillis()) {
         viewModelScope.launch {
             response.data?.let {
                 val itemsJson = Json.encodeToString(it.items)
@@ -293,7 +299,7 @@ class MainViewModel(
                     proteinG = it.macros.protein_g,
                     carbsG = it.macros.carbs_g,
                     fatG = it.macros.fat_g,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = timestamp,
                     itemsJson = itemsJson
                 )
                 repository.addMeal(meal)

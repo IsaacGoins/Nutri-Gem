@@ -43,6 +43,9 @@ interface HealthDao {
     @Query("SELECT SUM(amountOz) FROM water_intake WHERE timestamp >= :startOfDay")
     fun getWaterForDay(startOfDay: Long): Flow<Int?>
 
+    @androidx.room.Update
+    suspend fun updateWater(water: WaterEntity)
+
     @Insert
     suspend fun insertWeight(weight: WeightEntity)
 
