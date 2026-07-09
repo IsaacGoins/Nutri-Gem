@@ -48,9 +48,9 @@ class MainViewModel(
     val fatForDay = repository.getFatForDay(startOfDay).stateIn(viewModelScope, SharingStarted.Lazily, 0)
     val waterForDay = repository.getWaterForDay(startOfDay).stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
-    val allMeals = repository.getAllMeals().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    val allWater = repository.getAllWater().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-    val allWeight = repository.getAllWeight().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val allMeals = repository.getAllMeals().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val allWater = repository.getAllWater().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val allWeight = repository.getAllWeight().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _geminiState = MutableStateFlow<GeminiState>(GeminiState.Idle)
     val geminiState: StateFlow<GeminiState> = _geminiState
