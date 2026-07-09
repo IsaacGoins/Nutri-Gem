@@ -98,8 +98,8 @@ class GeminiClient {
             systemInstruction = com.google.ai.client.generativeai.type.content {
                 text("You are a precise nutrition API and a natural language translator for the FDA database. The user will provide a meal description.\n" +
                      "Your job is to parse this and return a JSON object.\n" +
-                     "Rule 1: Provide an optimized 'fda_search_term' for the full meal (translating natural language into generic terms, or keeping standard names for composite meals like 'Beef stew').\n" +
-                     "Rule 2: Provide a list of 'fallback_ingredients'. If the user's meal is a simple, single item (like 'an apple' or 'glass of milk'), do NOT break it down into ingredients; leave fallback_ingredients empty. If it is a complex meal (like 'a cheeseburger' or 'chicken salad'), break it down into its constituent ingredients (e.g. bun, beef patty, cheese), providing an optimized fda_search_term and estimated_macros for each.\n" +
+                     "Rule 1: Provide an optimized 'fda_search_term' for the full meal ONLY IF it is a single recognizable composite dish (e.g., 'Beef stew', 'Cheeseburger'). If the user provides a collection of distinct, separate items (e.g., 'Apple, banana, and toast' or multiple lines of items), you MUST set 'fda_search_term' to an empty string \"\" so they are kept separate.\n" +
+                     "Rule 2: Provide a list of 'fallback_ingredients'. If the meal is a single simple item (like 'an apple'), leave fallback_ingredients empty. If it is a complex meal or a list of multiple items, break it down into its constituent items in 'fallback_ingredients', providing an optimized fda_search_term and estimated_macros for each.\n" +
                      "Rule 3: Always provide the 'total_calories' for the entire meal.\n\n$jsonSchemaDefinition")
             }
         )
