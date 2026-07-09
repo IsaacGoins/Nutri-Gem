@@ -272,7 +272,6 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             val lbs = weightInput.toFloatOrNull()
                             if (lbs != null && lbs > 0) {
                                 viewModel.addWeight(lbs)
-                                Toast.makeText(context, "Weight has been saved", Toast.LENGTH_SHORT).show()
                                 showAddDialog = false
                             }
                         }) { Text("Save") }

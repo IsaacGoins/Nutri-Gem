@@ -51,7 +51,6 @@ fun AddMealScreen(
     val mealItems = remember { mutableStateListOf(MealItemInput()) }
     var clarificationAnswer by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
 
     // Reset state when leaving
     DisposableEffect(Unit) {
@@ -585,7 +584,6 @@ fun AddMealScreen(
                                     data.macros.fat_g = totalFat
                                     data.items = editedItems.toList()
                                     viewModel.saveMeal(state.response, editedTimestamp)
-                                    Toast.makeText(context, "Meal has been saved", Toast.LENGTH_SHORT).show()
                                     onSaveComplete()
                                 }) {
                                     Text("Save Meal")
