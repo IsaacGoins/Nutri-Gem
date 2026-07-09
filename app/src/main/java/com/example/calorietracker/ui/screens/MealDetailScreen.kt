@@ -346,14 +346,14 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
         Json.decodeFromString<List<GeminiItem>>(meal.itemsJson)
     } catch(e: Exception) { emptyList() }
     
-    var editedMealName by remember { mutableStateOf(meal.name) }
-    var editedTimestamp by remember { mutableStateOf(meal.timestamp) }
-    val editedItems = remember { mutableStateListOf(*itemsList.map { it.copy() }.toTypedArray()) }
+    var editedMealName by remember(meal) { mutableStateOf(meal.name) }
+    var editedTimestamp by remember(meal) { mutableStateOf(meal.timestamp) }
+    val editedItems = remember(meal) { mutableStateListOf(*itemsList.map { it.copy() }.toTypedArray()) }
     
     val scope = rememberCoroutineScope()
-    var isAnalyzing by remember { mutableStateOf(false) }
+    var isAnalyzing by remember(meal) { mutableStateOf(false) }
     
-    val aiItems = remember { mutableStateListOf(MealItemInput()) }
+    val aiItems = remember(meal) { mutableStateListOf(MealItemInput()) }
     
     Scaffold(
         topBar = {
