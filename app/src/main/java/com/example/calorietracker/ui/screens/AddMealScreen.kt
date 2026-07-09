@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -353,7 +355,8 @@ fun AddMealScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             OutlinedTextField(
@@ -373,11 +376,77 @@ fun AddMealScreen(
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             HorizontalDivider()
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Edit Items Breakdown", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(16.dp))
                             
-                            LazyColumn(modifier = Modifier.weight(1f)) {
-                                itemsIndexed(editedItems) { index, item ->
+                            if (editedItems.size > 1) {
+                                OutlinedCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text("Ingredients for $editedMealName", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        editedItems.forEachIndexed { index, item ->
+                                            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                                Column(modifier = Modifier.padding(8.dp)) {
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                        OutlinedTextField(
+                                                            value = item.name,
+                                                            onValueChange = { editedItems[index] = item.copy(name = it) },
+                                                            label = { Text("Name") },
+                                                            modifier = Modifier.weight(1.5f)
+                                                        )
+                                                        if (item.isFdaVerified) {
+                                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.CheckCircle,
+                                                                    contentDescription = "FDA Verified",
+                                                                    tint = MaterialTheme.colorScheme.primary,
+                                                                    modifier = Modifier.size(20.dp)
+                                                                )
+                                                                Text("FDA", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                                                            }
+                                                        }
+                                                        OutlinedTextField(
+                                                            value = if (item.calories == 0) "" else item.calories.toString(),
+                                                            onValueChange = { editedItems[index] = item.copy(calories = it.toIntOrNull() ?: 0) },
+                                                            label = { Text("Kcal") },
+                                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                            modifier = Modifier.weight(1f)
+                                                        )
+                                                    }
+                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                        OutlinedTextField(
+                                                            value = if (item.protein_g == 0) "" else item.protein_g.toString(),
+                                                            onValueChange = { editedItems[index] = item.copy(protein_g = it.toIntOrNull() ?: 0) },
+                                                            label = { Text("Protein (g)") },
+                                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                            modifier = Modifier.weight(1f)
+                                                        )
+                                                        OutlinedTextField(
+                                                            value = if (item.carbs_g == 0) "" else item.carbs_g.toString(),
+                                                            onValueChange = { editedItems[index] = item.copy(carbs_g = it.toIntOrNull() ?: 0) },
+                                                            label = { Text("Carbs (g)") },
+                                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                            modifier = Modifier.weight(1f)
+                                                        )
+                                                        OutlinedTextField(
+                                                            value = if (item.fat_g == 0) "" else item.fat_g.toString(),
+                                                            onValueChange = { editedItems[index] = item.copy(fat_g = it.toIntOrNull() ?: 0) },
+                                                            label = { Text("Fat (g)") },
+                                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                                            modifier = Modifier.weight(1f)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text("Item Details", style = MaterialTheme.typography.titleMedium)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                editedItems.forEachIndexed { index, item ->
                                     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                                         Column(modifier = Modifier.padding(8.dp)) {
                                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -410,21 +479,21 @@ fun AddMealScreen(
                                                 OutlinedTextField(
                                                     value = if (item.protein_g == 0) "" else item.protein_g.toString(),
                                                     onValueChange = { editedItems[index] = item.copy(protein_g = it.toIntOrNull() ?: 0) },
-                                                    label = { Text("Pro(g)") },
+                                                    label = { Text("Protein (g)") },
                                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                                     modifier = Modifier.weight(1f)
                                                 )
                                                 OutlinedTextField(
                                                     value = if (item.carbs_g == 0) "" else item.carbs_g.toString(),
                                                     onValueChange = { editedItems[index] = item.copy(carbs_g = it.toIntOrNull() ?: 0) },
-                                                    label = { Text("Carb(g)") },
+                                                    label = { Text("Carbs (g)") },
                                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                                     modifier = Modifier.weight(1f)
                                                 )
                                                 OutlinedTextField(
                                                     value = if (item.fat_g == 0) "" else item.fat_g.toString(),
                                                     onValueChange = { editedItems[index] = item.copy(fat_g = it.toIntOrNull() ?: 0) },
-                                                    label = { Text("Fat(g)") },
+                                                    label = { Text("Fat (g)") },
                                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                                     modifier = Modifier.weight(1f)
                                                 )
@@ -433,6 +502,8 @@ fun AddMealScreen(
                                     }
                                 }
                             }
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
                             Spacer(modifier = Modifier.height(16.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 OutlinedButton(onClick = { viewModel.resetGeminiState() }) {

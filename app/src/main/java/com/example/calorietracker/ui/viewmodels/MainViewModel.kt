@@ -140,13 +140,16 @@ class MainViewModel(
                     if (fdaKey.isNotBlank() && data.fda_search_term.isNotBlank()) {
                         val fdaData = fdaClient.searchFoodStructured(fdaKey, data.fda_search_term)
                         if (fdaData != null) {
+                            val fdaCal = fdaData.calories.takeIf { it > 0 } ?: 1
+                            val ratio = data.total_calories.toDouble() / fdaCal
+                            
                             compiledItems.add(
                                 com.example.calorietracker.data.network.GeminiItem(
                                     name = data.meal_name,
-                                    calories = fdaData.calories,
-                                    protein_g = fdaData.protein,
-                                    carbs_g = fdaData.carbs,
-                                    fat_g = fdaData.fat,
+                                    calories = data.total_calories, // Use Gemini's portion-adjusted calories
+                                    protein_g = (fdaData.protein * ratio).toInt(),
+                                    carbs_g = (fdaData.carbs * ratio).toInt(),
+                                    fat_g = (fdaData.fat * ratio).toInt(),
                                     isFdaVerified = true
                                 )
                             )
@@ -176,13 +179,16 @@ class MainViewModel(
                                 if (fdaKey.isNotBlank() && ingredient.fda_search_term.isNotBlank()) {
                                     val fdaData = fdaClient.searchFoodStructured(fdaKey, ingredient.fda_search_term)
                                     if (fdaData != null) {
+                                        val fdaCal = fdaData.calories.takeIf { it > 0 } ?: 1
+                                        val ratio = ingredient.estimated_macros.calories.toDouble() / fdaCal
+
                                         compiledItems.add(
                                             com.example.calorietracker.data.network.GeminiItem(
                                                 name = ingredient.name,
-                                                calories = fdaData.calories,
-                                                protein_g = fdaData.protein,
-                                                carbs_g = fdaData.carbs,
-                                                fat_g = fdaData.fat,
+                                                calories = ingredient.estimated_macros.calories, // Use Gemini's portion-adjusted calories
+                                                protein_g = (fdaData.protein * ratio).toInt(),
+                                                carbs_g = (fdaData.carbs * ratio).toInt(),
+                                                fat_g = (fdaData.fat * ratio).toInt(),
                                                 isFdaVerified = true
                                             )
                                         )
