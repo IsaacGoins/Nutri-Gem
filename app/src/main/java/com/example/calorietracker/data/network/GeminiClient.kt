@@ -148,7 +148,8 @@ class GeminiClient {
                      "  \"feedback\": \"Your short customized paragraph explaining the score and comparing it to the previous day if provided in the payload...\"\n" +
                      "}\n" +
                      "Be strict but fair. Estimate their TDEE using their profile to judge calorieScore. Analyze meal items for cleanScore (e.g. processed vs whole foods). Evaluate balanceScore based on how they spread their food.\n" +
-                     "CRITICAL: If the user provides 'notes' in their profile (e.g., 'intermittent fasting', 'keto'), you MUST heavily weight this context in your scoring (e.g., do not penalize them for skipping breakfast if fasting).")
+                     "CRITICAL: If the user provides 'notes' in their profile (e.g., 'intermittent fasting', 'keto'), you MUST heavily weight this context in your scoring (e.g., do not penalize them for skipping breakfast if fasting).\n" +
+                     "CRITICAL: If 'yesterdaysWaterOz' is 0, assume the user simply didn't use the app to track their water. Do NOT penalize them for it. Set waterScore to a neutral value like 100, and do not let it negatively impact the overallScore.")
             }
         )
 
