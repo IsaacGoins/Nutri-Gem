@@ -179,106 +179,20 @@ class MainViewModel(
 
                 val data = response.data
                 if (data != null) {
-                    val compiledItems = mutableListOf<com.example.calorietracker.data.network.GeminiItem>()
-                    var mealResolved = false
-                    
-                    // Tier 1: Full Meal FDA Search
-                    if (fdaKey.isNotBlank() && data.fda_search_term.isNotBlank()) {
-                        val fdaData = fdaClient.searchFoodStructured(fdaKey, data.fda_search_term)
-                        if (fdaData != null) {
-                            val fdaCal = fdaData.calories.takeIf { it > 0 } ?: 1
-                            val ratio = data.total_calories.toDouble() / fdaCal
-                            
-                            compiledItems.add(
-                                com.example.calorietracker.data.network.GeminiItem(
-                                    name = data.meal_name,
-                                    calories = data.total_calories, // Use Gemini's portion-adjusted calories
-                                    protein_g = (fdaData.protein * ratio).toInt(),
-                                    carbs_g = (fdaData.carbs * ratio).toInt(),
-                                    fat_g = (fdaData.fat * ratio).toInt(),
-                                    isFdaVerified = true
-                                )
-                            )
-                            mealResolved = true
-                        }
-                    }
-
-                    if (!mealResolved) {
-                        if (data.fallback_ingredients.isEmpty()) {
-                            // Single item, FDA failed, fallback to Gemini's total estimate
-                            compiledItems.add(
-                                com.example.calorietracker.data.network.GeminiItem(
-                                    name = data.meal_name,
-                                    calories = data.total_calories,
-                                    protein_g = 0, // Fallback macros are rough
-                                    carbs_g = 0,
-                                    fat_g = 0,
-                                    isFdaVerified = false
-                                )
-                            )
-                        } else {
-                            // Tier 2 & Tier 3: Ingredient Level
-                            for (ingredient in data.fallback_ingredients) {
-                                var ingredientResolved = false
-                                
-                                // Tier 2: FDA Lookup
-                                if (fdaKey.isNotBlank() && ingredient.fda_search_term.isNotBlank()) {
-                                    val fdaData = fdaClient.searchFoodStructured(fdaKey, ingredient.fda_search_term)
-                                    if (fdaData != null) {
-                                        val fdaCal = fdaData.calories.takeIf { it > 0 } ?: 1
-                                        val ratio = ingredient.estimated_macros.calories.toDouble() / fdaCal
-
-                                        compiledItems.add(
-                                            com.example.calorietracker.data.network.GeminiItem(
-                                                name = ingredient.name,
-                                                calories = ingredient.estimated_macros.calories, // Use Gemini's portion-adjusted calories
-                                                protein_g = (fdaData.protein * ratio).toInt(),
-                                                carbs_g = (fdaData.carbs * ratio).toInt(),
-                                                fat_g = (fdaData.fat * ratio).toInt(),
-                                                isFdaVerified = true
-                                            )
-                                        )
-                                        ingredientResolved = true
-                                    }
-                                }
-                                
-                                // Tier 3: Gemini Fallback
-                                if (!ingredientResolved) {
-                                    compiledItems.add(
-                                        com.example.calorietracker.data.network.GeminiItem(
-                                            name = ingredient.name,
-                                            calories = ingredient.estimated_macros.calories,
-                                            protein_g = ingredient.estimated_macros.protein_g,
-                                            carbs_g = ingredient.estimated_macros.carbs_g,
-                                            fat_g = ingredient.estimated_macros.fat_g,
-                                            isFdaVerified = false
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Add any manual items the user provided
+                    val compiledItems = compileItems(data, fdaKey).toMutableList()
                     compiledItems.addAll(manualItems)
-
-                    // Compile Totals
-                    val totalCalories = compiledItems.sumOf { it.calories }
-                    val totalProtein = compiledItems.sumOf { it.protein_g }
-                    val totalCarbs = compiledItems.sumOf { it.carbs_g }
-                    val totalFat = compiledItems.sumOf { it.fat_g }
-
-                    data.total_calories = totalCalories
-                    data.macros = com.example.calorietracker.data.network.GeminiMacros(
-                        protein_g = totalProtein,
-                        carbs_g = totalCarbs,
-                        fat_g = totalFat
-                    )
+                    
                     data.items = compiledItems
+                    data.total_calories = compiledItems.sumOf { it.calories }
+                    data.macros = com.example.calorietracker.data.network.GeminiMacros(
+                        protein_g = compiledItems.sumOf { it.protein_g },
+                        carbs_g = compiledItems.sumOf { it.carbs_g },
+                        fat_g = compiledItems.sumOf { it.fat_g }
+                    )
 
                     _geminiState.value = GeminiState.Success(response)
                 } else {
-                    _geminiState.value = GeminiState.Error("Failed to parse meal data.")
+                    _geminiState.value = GeminiState.Error("Failed to parse meal details. Try again.")
                 }
             } catch (e: Exception) {
                 _geminiState.value = GeminiState.Error("An error occurred: ${e.message}")
@@ -288,13 +202,98 @@ class MainViewModel(
 
     suspend fun analyzeSingleItem(prompt: String): List<com.example.calorietracker.data.network.GeminiItem> {
         val key = _apiKey.value
+        val fdaKey = _fdaApiKey.value
         if (key.isBlank()) return emptyList()
         return try {
             val response = geminiClient.analyzeMeal(key, prompt)
-            response.data?.items ?: emptyList()
+            val data = response.data ?: return emptyList()
+            compileItems(data, fdaKey)
         } catch (e: Exception) {
             emptyList()
         }
+    }
+
+    private suspend fun compileItems(data: com.example.calorietracker.data.network.GeminiData, fdaKey: String): List<com.example.calorietracker.data.network.GeminiItem> {
+        val compiledItems = mutableListOf<com.example.calorietracker.data.network.GeminiItem>()
+        var mealResolved = false
+        
+        // Tier 1: Full Meal FDA Search
+        if (fdaKey.isNotBlank() && data.fda_search_term.isNotBlank()) {
+            val fdaData = fdaClient.searchFoodStructured(fdaKey, data.fda_search_term)
+            if (fdaData != null) {
+                val fdaCal = fdaData.calories.takeIf { it > 0 } ?: 1
+                val ratio = data.total_calories.toDouble() / fdaCal
+                
+                compiledItems.add(
+                    com.example.calorietracker.data.network.GeminiItem(
+                        name = data.meal_name,
+                        calories = data.total_calories, // Use Gemini's portion-adjusted calories
+                        protein_g = (fdaData.protein * ratio).toInt(),
+                        carbs_g = (fdaData.carbs * ratio).toInt(),
+                        fat_g = (fdaData.fat * ratio).toInt(),
+                        isFdaVerified = true
+                    )
+                )
+                mealResolved = true
+            }
+        }
+
+        if (!mealResolved) {
+            if (data.fallback_ingredients.isEmpty()) {
+                // Single item, FDA failed, fallback to Gemini's total estimate
+                compiledItems.add(
+                    com.example.calorietracker.data.network.GeminiItem(
+                        name = data.meal_name,
+                        calories = data.total_calories,
+                        protein_g = 0, // Fallback macros are rough
+                        carbs_g = 0,
+                        fat_g = 0,
+                        isFdaVerified = false
+                    )
+                )
+            } else {
+                // Tier 2 & Tier 3: Ingredient Level
+                for (ingredient in data.fallback_ingredients) {
+                    var ingredientResolved = false
+                    
+                    // Tier 2: FDA Lookup
+                    if (fdaKey.isNotBlank() && ingredient.fda_search_term.isNotBlank()) {
+                        val fdaData = fdaClient.searchFoodStructured(fdaKey, ingredient.fda_search_term)
+                        if (fdaData != null) {
+                            val fdaCal = fdaData.calories.takeIf { it > 0 } ?: 1
+                            val ratio = ingredient.estimated_macros.calories.toDouble() / fdaCal
+
+                            compiledItems.add(
+                                com.example.calorietracker.data.network.GeminiItem(
+                                    name = ingredient.name,
+                                    calories = ingredient.estimated_macros.calories, // Use Gemini's portion-adjusted calories
+                                    protein_g = (fdaData.protein * ratio).toInt(),
+                                    carbs_g = (fdaData.carbs * ratio).toInt(),
+                                    fat_g = (fdaData.fat * ratio).toInt(),
+                                    isFdaVerified = true
+                                )
+                            )
+                            ingredientResolved = true
+                        }
+                    }
+                    
+                    // Tier 3: Gemini Fallback
+                    if (!ingredientResolved) {
+                        compiledItems.add(
+                            com.example.calorietracker.data.network.GeminiItem(
+                                name = ingredient.name,
+                                calories = ingredient.estimated_macros.calories,
+                                protein_g = ingredient.estimated_macros.protein_g,
+                                carbs_g = ingredient.estimated_macros.carbs_g,
+                                fat_g = ingredient.estimated_macros.fat_g,
+                                isFdaVerified = false
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        return compiledItems
     }
 
     fun saveMeal(response: GeminiResponse, timestamp: Long = System.currentTimeMillis()) {
