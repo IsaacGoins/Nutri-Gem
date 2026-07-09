@@ -15,6 +15,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +94,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             var inputAge by remember { mutableStateOf(age.toString()) }
             var inputHeight by remember { mutableStateOf(height.toString()) }
             
-            val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+            val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
             var selectedDays by remember { 
                 mutableStateOf(
                     activeDays.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
@@ -127,23 +129,22 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             ) {
                 daysOfWeek.forEach { day ->
                     val isSelected = selectedDays.contains(day)
-                    Surface(
-                        shape = androidx.compose.foundation.shape.CircleShape,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .size(40.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                             .clickable {
                                 selectedDays = if (isSelected) selectedDays - day else selectedDays + day
                             }
                     ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Text(
-                                text = day.take(1),
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = day.take(1),
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

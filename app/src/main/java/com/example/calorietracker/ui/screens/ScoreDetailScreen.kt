@@ -70,16 +70,16 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 Text("Score Breakdown", style = MaterialTheme.typography.titleLarge)
                 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ScoreRingCard(title = "Clean Diet", score = latestScore.cleanScore, modifier = Modifier.weight(1f))
-                    ScoreRingCard(title = "Macros", score = latestScore.macroScore, modifier = Modifier.weight(1f))
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ScoreRingCard(title = "Calories", score = latestScore.calorieScore, modifier = Modifier.weight(1f))
-                    ScoreRingCard(title = "Hydration", score = latestScore.waterScore, modifier = Modifier.weight(1f))
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ScoreRingCard(title = "Meal Balance", score = latestScore.balanceScore, modifier = Modifier.weight(1f))
                     ScoreRingCard(title = "Overall Score", score = latestScore.overallScore, modifier = Modifier.weight(1f), isOverall = true)
+                    ScoreRingCard(title = "Clean Diet", score = latestScore.cleanScore, modifier = Modifier.weight(1f))
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ScoreRingCard(title = "Macros", score = latestScore.macroScore, modifier = Modifier.weight(1f))
+                    ScoreRingCard(title = "Calories", score = latestScore.calorieScore, modifier = Modifier.weight(1f))
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ScoreRingCard(title = "Hydration", score = latestScore.waterScore, modifier = Modifier.weight(1f))
+                    ScoreRingCard(title = "Meal Balance", score = latestScore.balanceScore, modifier = Modifier.weight(1f))
                 }
 
                 // AI Feedback
@@ -113,8 +113,8 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 
 @Composable
 fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOverall: Boolean = false) {
-    val containerColor = if (isOverall) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (isOverall) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface
+    val containerColor = MaterialTheme.colorScheme.surfaceVariant
+    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
     
     Card(
         modifier = modifier,
@@ -127,7 +127,7 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOv
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = textColor)
             Spacer(modifier = Modifier.height(16.dp))
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
-                val primaryColor = if (isOverall) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                val primaryColor = if (isOverall) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
                 val trackColor = primaryColor.copy(alpha = 0.2f)
                 
                 Canvas(modifier = Modifier.size(80.dp)) {
