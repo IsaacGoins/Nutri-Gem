@@ -28,6 +28,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToMeals: () -> Unit,
     onNavigateToWater: () -> Unit,
+    onNavigateToWeight: () -> Unit,
     onNavigateToAddMeal: () -> Unit
 ) {
     val calories by viewModel.caloriesForDay.collectAsState()
@@ -35,6 +36,10 @@ fun HomeScreen(
     val carbs by viewModel.carbsForDay.collectAsState()
     val fat by viewModel.fatForDay.collectAsState()
     val water by viewModel.waterForDay.collectAsState()
+    
+    // We can show the most recent weight
+    val weightLogs by viewModel.allWeight.collectAsState()
+    val currentWeight = weightLogs.firstOrNull()?.weightLbs ?: 0f
 
     Scaffold(
         topBar = {
@@ -66,6 +71,8 @@ fun HomeScreen(
                 )
 
                 WaterBanner(water = water ?: 0, onClick = onNavigateToWater)
+                
+                WeightBanner(weight = currentWeight, onClick = onNavigateToWeight)
             }
 
         }
@@ -166,6 +173,32 @@ fun WaterBanner(water: Int, onClick: () -> Unit) {
                 Text("$water oz", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             }
             Icon(Icons.Default.LocalDrink, contentDescription = null, modifier = Modifier.size(48.dp))
+        }
+    }
+}
+
+@Composable
+fun WeightBanner(weight: Float, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Weight", style = MaterialTheme.typography.titleMedium)
+                val weightStr = if (weight > 0f) "$weight lbs" else "-- lbs"
+                Text(weightStr, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }

@@ -21,3 +21,10 @@ data class WaterEntity(
     val amountOz: Int,
     val timestamp: Long
 )
+
+@Entity(tableName = "weight_log")
+data class WeightEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val weightLbs: Float,
+    val timestamp: Long
+)

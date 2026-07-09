@@ -77,6 +77,7 @@ fun AppNavigation() {
                     onNavigateToSettings = { navController.navigate("settings") },
                     onNavigateToMeals = { navController.navigate("meals") },
                     onNavigateToWater = { navController.navigate("water") },
+                    onNavigateToWeight = { navController.navigate("weight_detail") },
                     onNavigateToAddMeal = { navController.navigate("add_meal") }
                 )
             }
@@ -93,6 +94,9 @@ fun AppNavigation() {
             composable("water") {
                 WaterDetailScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
             }
+            composable("weight_detail") {
+                WeightDetailScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+            }
             composable("add_meal") {
                 AddMealScreen(
                     viewModel = viewModel,
@@ -103,7 +107,7 @@ fun AppNavigation() {
         }
         
         // Global FABs Overlay
-        if (currentRoute != "add_meal" && !isEditingMeal) {
+        if (currentRoute != "add_meal" && !isEditingMeal && currentRoute != "weight_detail" && currentRoute != "settings") {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -111,6 +115,7 @@ fun AppNavigation() {
                     .padding(16.dp)
             ) {
                 // Water FAB Menu
+                if (currentRoute == "home" || currentRoute == "water") {
                 Column(
                     modifier = Modifier.align(Alignment.BottomStart),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -151,17 +156,20 @@ fun AppNavigation() {
                     ) {
                         Icon(Icons.Default.LocalDrink, contentDescription = "Add Water")
                     }
-                }
+                } // This closes the Column
+                } // This closes the if (currentRoute == "home" || currentRoute == "water")
 
                 // Add Meal FAB
-                ExtendedFloatingActionButton(
-                    onClick = { navController.navigate("add_meal") },
-                    modifier = Modifier.align(Alignment.BottomEnd),
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Add Meal") }
-                )
+                if (currentRoute == "home" || currentRoute == "meals") {
+                    ExtendedFloatingActionButton(
+                        onClick = { navController.navigate("add_meal") },
+                        modifier = Modifier.align(Alignment.BottomEnd),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        text = { Text("Add Meal") }
+                    )
+                }
             }
         }
     }

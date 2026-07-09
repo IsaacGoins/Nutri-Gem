@@ -47,6 +47,7 @@ class MainViewModel(
 
     val allMeals = repository.getAllMeals().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
     val allWater = repository.getAllWater().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val allWeight = repository.getAllWeight().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _geminiState = MutableStateFlow<GeminiState>(GeminiState.Idle)
     val geminiState: StateFlow<GeminiState> = _geminiState
@@ -70,6 +71,18 @@ class MainViewModel(
     fun deleteWater(water: WaterEntity) {
         viewModelScope.launch {
             repository.deleteWater(water)
+        }
+    }
+
+    fun addWeight(weightLbs: Float) {
+        viewModelScope.launch {
+            repository.addWeight(com.example.calorietracker.data.local.WeightEntity(weightLbs = weightLbs, timestamp = System.currentTimeMillis()))
+        }
+    }
+
+    fun deleteWeight(weight: com.example.calorietracker.data.local.WeightEntity) {
+        viewModelScope.launch {
+            repository.deleteWeight(weight)
         }
     }
 
