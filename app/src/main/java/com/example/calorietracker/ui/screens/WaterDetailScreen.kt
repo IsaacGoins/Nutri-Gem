@@ -45,11 +45,32 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     .height(200.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
-                Box(contentAlignment = androidx.compose.ui.Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text("Analytics Graph (Coming Soon)", style = MaterialTheme.typography.titleMedium)
+                if (waterIntake.isEmpty()) {
+                    Box(contentAlignment = androidx.compose.ui.Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Text("No water data yet", style = MaterialTheme.typography.titleMedium)
+                    }
+                } else {
+                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+                        val recentIntakes = waterIntake.take(7).reversed()
+                        val maxWater = recentIntakes.maxOfOrNull { it.amountOz }?.toFloat() ?: 1f
+                        val barWidth = size.width / (recentIntakes.size * 2f).coerceAtLeast(1f)
+                        val maxBarHeight = size.height
+
+                        recentIntakes.forEachIndexed { index, water ->
+                            val barHeight = (water.amountOz / maxWater) * maxBarHeight
+                            val xOffset = index * (barWidth * 2) + barWidth / 2f
+                            val yOffset = size.height - barHeight
+
+                            drawRoundRect(
+                                color = androidx.compose.ui.graphics.Color(0xFF00BCD4), // Cyan
+                                topLeft = androidx.compose.ui.geometry.Offset(xOffset, yOffset),
+                                size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(12f, 12f)
+                            )
+                        }
+                    }
                 }
             }
-            
             Text(
                 "Water Log",
                 style = MaterialTheme.typography.titleLarge,

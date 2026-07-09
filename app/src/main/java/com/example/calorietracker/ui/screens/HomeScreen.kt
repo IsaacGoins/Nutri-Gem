@@ -118,12 +118,28 @@ fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, onClick: () -
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(200.dp)) {
                 Canvas(modifier = Modifier.size(160.dp)) {
                     val stroke = Stroke(width = 30f, cap = StrokeCap.Round)
-                    // Simplified pie chart drawing
-                    drawArc(Color.LightGray, 0f, 360f, false, style = stroke)
-                    if (protein > 0 || carbs > 0 || fat > 0) {
-                        drawArc(Color.Red, -90f, 120f, false, style = stroke)
-                        drawArc(Color.Green, 30f, 120f, false, style = stroke)
-                        drawArc(Color.Blue, 150f, 120f, false, style = stroke)
+                    val totalGrams = (protein + carbs + fat).toFloat()
+                    
+                    if (totalGrams == 0f) {
+                        drawArc(Color.LightGray, 0f, 360f, false, style = stroke)
+                    } else {
+                        val proteinAngle = (protein / totalGrams) * 360f
+                        val carbsAngle = (carbs / totalGrams) * 360f
+                        val fatAngle = (fat / totalGrams) * 360f
+                        
+                        var startAngle = -90f
+                        
+                        if (protein > 0) {
+                            drawArc(Color.Red, startAngle, proteinAngle, false, style = stroke)
+                            startAngle += proteinAngle
+                        }
+                        if (carbs > 0) {
+                            drawArc(Color.Green, startAngle, carbsAngle, false, style = stroke)
+                            startAngle += carbsAngle
+                        }
+                        if (fat > 0) {
+                            drawArc(Color.Blue, startAngle, fatAngle, false, style = stroke)
+                        }
                     }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

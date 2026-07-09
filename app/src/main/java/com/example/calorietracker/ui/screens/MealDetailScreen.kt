@@ -46,11 +46,58 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     .height(200.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
-                Box(contentAlignment = androidx.compose.ui.Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text("Analytics Graph (Coming Soon)", style = MaterialTheme.typography.titleMedium)
+                if (meals.isEmpty()) {
+                    Box(contentAlignment = androidx.compose.ui.Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Text("No meal data yet", style = MaterialTheme.typography.titleMedium)
+                    }
+                } else {
+                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+                        val recentMeals = meals.take(7).reversed()
+                        val maxCalories = recentMeals.maxOfOrNull { it.calories }?.toFloat() ?: 1f
+                        val xStep = if (recentMeals.size > 1) size.width / (recentMeals.size - 1) else size.width / 2f
+                        
+                        val path = androidx.compose.ui.graphics.Path()
+
+                        recentMeals.forEachIndexed { index, meal ->
+                            val x = if (recentMeals.size == 1) size.width / 2f else index * xStep
+                            val y = size.height - ((meal.calories / maxCalories) * size.height)
+                            
+                            if (index == 0) {
+                                path.moveTo(x, y)
+                            } else {
+                                path.lineTo(x, y)
+                            }
+                        }
+                        
+                        if (recentMeals.size > 1) {
+                            drawPath(
+                                path = path,
+                                color = androidx.compose.ui.graphics.Color(0xFFFF5252), // Red Accent
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                    width = 8f, 
+                                    cap = androidx.compose.ui.graphics.StrokeCap.Round, 
+                                    join = androidx.compose.ui.graphics.StrokeJoin.Round
+                                )
+                            )
+                        }
+                        
+                        recentMeals.forEachIndexed { index, meal ->
+                            val x = if (recentMeals.size == 1) size.width / 2f else index * xStep
+                            val y = size.height - ((meal.calories / maxCalories) * size.height)
+                            drawCircle(
+                                color = androidx.compose.ui.graphics.Color.White,
+                                radius = 16f,
+                                center = androidx.compose.ui.geometry.Offset(x, y)
+                            )
+                            drawCircle(
+                                color = androidx.compose.ui.graphics.Color(0xFFFF5252),
+                                radius = 10f,
+                                center = androidx.compose.ui.geometry.Offset(x, y)
+                            )
+                        }
+                    }
                 }
             }
-            
             Text(
                 "Meal Log",
                 style = MaterialTheme.typography.titleLarge,
