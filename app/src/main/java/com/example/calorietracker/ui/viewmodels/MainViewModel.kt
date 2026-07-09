@@ -82,6 +82,9 @@ class MainViewModel(
     private val _activeDays = MutableStateFlow(secureStorage.getActiveDays())
     val activeDays: StateFlow<String> = _activeDays
 
+    private val _profileNotes = MutableStateFlow(secureStorage.getProfileNotes())
+    val profileNotes: StateFlow<String> = _profileNotes
+
     fun saveAge(age: Int) {
         secureStorage.saveAge(age)
         _age.value = age
@@ -100,6 +103,11 @@ class MainViewModel(
     fun saveActiveDays(days: String) {
         secureStorage.saveActiveDays(days)
         _activeDays.value = days
+    }
+
+    fun saveProfileNotes(notes: String) {
+        secureStorage.saveProfileNotes(notes)
+        _profileNotes.value = notes
     }
 
     fun addWater(amountOz: Int) {
@@ -367,7 +375,7 @@ class MainViewModel(
                 
                 val payloadJson = """
                 {
-                  "profile": { "age": ${age.value}, "heightInches": ${heightInches.value}, "weightGoalLbs": ${weightGoal.value}, "workoutsPerWeek": ${workoutsPerWeek.value}, "activeDays": "${activeDays.value}" },
+                  "profile": { "age": ${age.value}, "heightInches": ${heightInches.value}, "weightGoalLbs": ${weightGoal.value}, "workoutsPerWeek": ${workoutsPerWeek.value}, "activeDays": "${activeDays.value}", "notes": "${profileNotes.value.replace("\"", "\\\"").replace("\n", " ")}" },
                   "yesterdaysMeals": [$mealsJsonArray],
                   "yesterdaysWaterOz": ${yesterdaysWater.sumOf { it.amountOz }},
                   "previousDayOverallScore": ${prevScore?.overallScore ?: -1}

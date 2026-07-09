@@ -73,4 +73,12 @@ class SecureStorage(context: Context) {
     fun getActiveDays(): String {
         return sharedPreferences.getString("ACTIVE_DAYS", "Mon, Wed, Fri") ?: "Mon, Wed, Fri"
     }
+
+    fun saveProfileNotes(notes: String) {
+        sharedPreferences.edit().putString("PROFILE_NOTES", notes).apply()
+    }
+
+    fun getProfileNotes(): String {
+        return sharedPreferences.getString("PROFILE_NOTES", "") ?: ""
+    }
 }

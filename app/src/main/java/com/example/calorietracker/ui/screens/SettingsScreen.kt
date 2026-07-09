@@ -90,9 +90,11 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             val age by viewModel.age.collectAsState()
             val height by viewModel.heightInches.collectAsState()
             val activeDays by viewModel.activeDays.collectAsState()
+            val profileNotes by viewModel.profileNotes.collectAsState()
 
             var inputAge by remember { mutableStateOf(age.toString()) }
             var inputHeight by remember { mutableStateOf(height.toString()) }
+            var inputNotes by remember { mutableStateOf(profileNotes) }
             
             val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
             var selectedDays by remember { 
@@ -149,6 +151,15 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 }
             }
             
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = inputNotes,
+                onValueChange = { inputNotes = it },
+                label = { Text("Notes / Context for AI (e.g. Intermittent fasting)") },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 100.dp),
+                maxLines = 5
+            )
+            
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = { 
@@ -156,6 +167,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     viewModel.saveHeight(inputHeight.toIntOrNull() ?: 68)
                     viewModel.saveWorkoutsPerWeek(selectedDays.size)
                     viewModel.saveActiveDays(selectedDays.joinToString(","))
+                    viewModel.saveProfileNotes(inputNotes)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
