@@ -432,11 +432,20 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                         confirmButton = {
                             TextButton(onClick = {
                                 showTimePicker = false
-                                val calendar = java.util.Calendar.getInstance()
-                                calendar.timeInMillis = datePickerState.selectedDateMillis ?: editedTimestamp
-                                calendar.set(java.util.Calendar.HOUR_OF_DAY, timePickerState.hour)
-                                calendar.set(java.util.Calendar.MINUTE, timePickerState.minute)
-                                editedTimestamp = calendar.timeInMillis
+                                val localCalendar = java.util.Calendar.getInstance()
+                                val selectedUtc = datePickerState.selectedDateMillis
+                                if (selectedUtc != null) {
+                                    val utcCalendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
+                                    utcCalendar.timeInMillis = selectedUtc
+                                    localCalendar.set(
+                                        utcCalendar.get(java.util.Calendar.YEAR),
+                                        utcCalendar.get(java.util.Calendar.MONTH),
+                                        utcCalendar.get(java.util.Calendar.DAY_OF_MONTH)
+                                    )
+                                }
+                                localCalendar.set(java.util.Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                localCalendar.set(java.util.Calendar.MINUTE, timePickerState.minute)
+                                editedTimestamp = localCalendar.timeInMillis
                             }) { Text("Confirm") }
                         },
                         dismissButton = {
