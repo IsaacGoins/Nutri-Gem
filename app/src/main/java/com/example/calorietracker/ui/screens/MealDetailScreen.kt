@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -31,6 +32,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import com.example.calorietracker.data.local.MealEntity
 import com.example.calorietracker.data.network.GeminiItem
 import com.example.calorietracker.ui.viewmodels.MainViewModel
@@ -41,6 +44,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class DaySum(val date: String, val timestamp: Long, val kcals: Int, val protein: Int, val carbs: Int, val fat: Int)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChange: (Boolean) -> Unit = {}) {
@@ -49,8 +54,6 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
     // Group by day
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val groupedMeals = meals.groupBy { dateFormat.format(Date(it.timestamp)) }
-    
-    data class DaySum(val date: String, val timestamp: Long, val kcals: Int, val protein: Int, val carbs: Int, val fat: Int)
     
     val daySums = groupedMeals.map { (date, dayMeals) ->
         DaySum(
@@ -83,157 +86,87 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                 )
             }
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    listOf("Kcal", "Protein", "Carbs", "Fat").forEach { metric ->
-                        FilterChip(
-                            selected = selectedMetric == metric,
-                            onClick = { selectedMetric = metric },
-                            label = { Text(metric) }
+            var selectedTabIndex by remember { mutableStateOf(0) }
+            com.example.calorietracker.ui.components.DayCarousel(
+                days = daySums,
+                getDate = { it.timestamp },
+                modifier = Modifier.padding(paddingValues),
+                emptyMessage = "No meal data available."
+            ) { currentDaySum ->
+                Column(modifier = Modifier.fillMaxSize()) {
+                    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(48.dp)) {
+                        Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Macros") })
+                        Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
+                    }
+                    
+                    if (selectedTabIndex == 0) {
+                        Box(modifier = Modifier.padding(16.dp)) {
+                            HeroSection(
+                                calories = currentDaySum.kcals,
+                                protein = currentDaySum.protein,
+                                carbs = currentDaySum.carbs,
+                                fat = currentDaySum.fat,
+                                onClick = {}
+                            )
+                        }
+                    } else {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                listOf("Kcal", "Protein", "Carbs", "Fat").forEach { metric ->
+                                    FilterChip(
+                                        selected = selectedMetric == metric,
+                                        onClick = { selectedMetric = metric },
+                                        label = { Text(metric) }
+                                    )
+                                }
+                            }
+                            Card(
+                                modifier = Modifier.fillMaxWidth().height(240.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                                    MacroHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp, selectedMetric = selectedMetric)
+                                }
+                            }
+                        }
+                    }
+
+                    Text(
+                        "Meal Log",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    
+                    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    var mealToDelete by remember { mutableStateOf<MealEntity?>(null) }
+                    
+                    if (mealToDelete != null) {
+                        AlertDialog(
+                            onDismissRequest = { mealToDelete = null },
+                            title = { Text("Delete Meal") },
+                            text = { Text("Are you sure you want to delete ${mealToDelete?.name}?") },
+                            confirmButton = {
+                                TextButton(onClick = { 
+                                    viewModel.deleteMeal(mealToDelete!!)
+                                    mealToDelete = null 
+                                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { mealToDelete = null }) { Text("Cancel") }
+                            }
                         )
                     }
-                }
-
-            val primaryColor = MaterialTheme.colorScheme.primary
-            
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .height(240.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-            ) {
-                if (daySums.isEmpty()) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Text("No meal data yet", style = MaterialTheme.typography.titleMedium)
-                    }
-                } else {
-                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(top = 24.dp, bottom = 48.dp, start = 48.dp, end = 24.dp)) {
-                        val maxVal = daySums.maxOfOrNull { 
-                            when(selectedMetric) {
-                                "Kcal" -> it.kcals
-                                "Protein" -> it.protein
-                                "Carbs" -> it.carbs
-                                else -> it.fat
-                            }
-                        }?.toFloat()?.coerceAtLeast(1f) ?: 1f
-                        
-                        val xStep = if (daySums.size > 1) size.width / (daySums.size - 1) else size.width / 2f
-                        
-                        // Grid lines
-                        val gridLinesCount = 4
-                        for (i in 0..gridLinesCount) {
-                            val yLine = size.height - (i * size.height / gridLinesCount)
-                            drawLine(
-                                color = Color.LightGray.copy(alpha = 0.5f),
-                                start = Offset(0f, yLine),
-                                end = Offset(size.width, yLine),
-                                strokeWidth = 2f
-                            )
-                        }
-
-                        val axisPaint = android.graphics.Paint().apply {
-                            color = android.graphics.Color.GRAY
-                            textSize = 30f
-                        }
-                        
-                        drawContext.canvas.nativeCanvas.drawText(maxVal.toInt().toString(), -40f, 0f, axisPaint)
-                        drawContext.canvas.nativeCanvas.drawText("0", -40f, size.height, axisPaint)
-                        
-                        val path = Path()
-                        val lineColor = when(selectedMetric) {
-                            "Kcal" -> primaryColor
-                            "Protein" -> Color(0xFFEF5350) 
-                            "Carbs" -> Color(0xFF66BB6A) 
-                            else -> Color(0xFF42A5F5) 
-                        }
-
-                        daySums.forEachIndexed { index, day ->
-                            val x = if (daySums.size == 1) size.width / 2f else index * xStep
-                            val v = when(selectedMetric) {
-                                "Kcal" -> day.kcals
-                                "Protein" -> day.protein
-                                "Carbs" -> day.carbs
-                                else -> day.fat
-                            }
-                            val y = size.height - ((v / maxVal) * size.height)
-                            
-                            val shortDate = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date(day.timestamp))
-                            drawContext.canvas.nativeCanvas.drawText(shortDate, x - 30f, size.height + 40f, axisPaint)
-                            
-                            if (index == 0) {
-                                path.moveTo(x, y)
-                            } else {
-                                path.lineTo(x, y)
-                            }
-                        }
-                        
-                        if (daySums.size > 1) {
-                            drawPath(
-                                path = path,
-                                color = lineColor,
-                                style = Stroke(width = 8f, cap = StrokeCap.Round, join = StrokeJoin.Round)
-                            )
-                        }
-                        
-                        daySums.forEachIndexed { index, day ->
-                            val x = if (daySums.size == 1) size.width / 2f else index * xStep
-                            val v = when(selectedMetric) {
-                                "Kcal" -> day.kcals
-                                "Protein" -> day.protein
-                                "Carbs" -> day.carbs
-                                else -> day.fat
-                            }
-                            val y = size.height - ((v / maxVal) * size.height)
-                            drawCircle(color = Color.White, radius = 16f, center = Offset(x, y))
-                            drawCircle(color = lineColor, radius = 10f, center = Offset(x, y))
-                        }
-                    }
-                }
-            }
-            Text(
-                "Meal Log",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-            
-            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-            var mealToDelete by remember { mutableStateOf<MealEntity?>(null) }
-            
-            if (mealToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = { mealToDelete = null },
-                    title = { Text("Delete Meal") },
-                    text = { Text("Are you sure you want to delete ${mealToDelete?.name}?") },
-                    confirmButton = {
-                        TextButton(onClick = { 
-                            viewModel.deleteMeal(mealToDelete!!)
-                            mealToDelete = null 
-                        }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { mealToDelete = null }) { Text("Cancel") }
-                    }
-                )
-            }
-            
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                groupedMeals.forEach { (date, mealsForDay) ->
-                    item {
-                        Text(date, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
-                    }
-                    items(mealsForDay, key = { it.id }) { meal ->
+                    
+                    val mealsForDay = groupedMeals[currentDaySum.date] ?: emptyList()
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(mealsForDay, key = { it.id }) { meal ->
                         key(meal) {
                             var expanded by remember { mutableStateOf(false) }
                         
@@ -694,6 +627,156 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                     }
                 }
                 Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun MacroHistoryGraph(
+    daySums: List<DaySum>, 
+    endingAt: Long, 
+    selectedMetric: String
+) {
+    if (daySums.isEmpty()) return
+    
+    val allSorted = daySums.sortedBy { it.timestamp }
+    val idx = allSorted.indexOfFirst { it.timestamp == endingAt }
+    
+    val filteredDays = if (idx != -1) {
+        val start = maxOf(0, idx - 3)
+        val end = minOf(allSorted.size, start + 7)
+        val adjustedStart = maxOf(0, end - 7)
+        allSorted.subList(adjustedStart, end)
+    } else {
+        allSorted.takeLast(7)
+    }
+    
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val lineColor = when(selectedMetric) {
+        "Kcal" -> primaryColor
+        "Protein" -> Color(0xFFEF5350) 
+        "Carbs" -> Color(0xFF66BB6A) 
+        else -> Color(0xFF42A5F5) 
+    }
+    
+    var selectedIndex by remember(endingAt, filteredDays) { 
+        val i = filteredDays.indexOfFirst { it.timestamp == endingAt }
+        mutableStateOf<Int?>(if (i != -1) i else null) 
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+            val canvasSize = this.size
+            detectTapGestures { tapOffset ->
+                val xStep = if (filteredDays.size > 1) canvasSize.width.toFloat() / (filteredDays.size - 1) else canvasSize.width.toFloat() / 2f
+                var closestIdx = -1
+                var minDistance = Float.MAX_VALUE
+                
+                filteredDays.forEachIndexed { index, _ ->
+                    val x = if (filteredDays.size == 1) canvasSize.width.toFloat() / 2f else index * xStep
+                    val dist = kotlin.math.abs(tapOffset.x - x)
+                    if (dist < minDistance && dist < 100f) {
+                        minDistance = dist
+                        closestIdx = index
+                    }
+                }
+                selectedIndex = if (closestIdx != -1) closestIdx else null
+            }
+        }) {
+            val maxVal = filteredDays.maxOfOrNull { 
+                when(selectedMetric) {
+                    "Kcal" -> it.kcals
+                    "Protein" -> it.protein
+                    "Carbs" -> it.carbs
+                    else -> it.fat
+                }
+            }?.toFloat()?.coerceAtLeast(1f) ?: 1f
+            
+            val xStep = if (filteredDays.size > 1) size.width / (filteredDays.size - 1) else size.width / 2f
+            
+            // Grid lines
+            val gridLinesCount = 4
+            for (i in 0..gridLinesCount) {
+                val yLine = size.height - (i * size.height / gridLinesCount)
+                drawLine(
+                    color = Color.LightGray.copy(alpha = 0.5f),
+                    start = Offset(0f, yLine),
+                    end = Offset(size.width, yLine),
+                    strokeWidth = 2f
+                )
+            }
+
+            val axisPaint = android.graphics.Paint().apply {
+                color = android.graphics.Color.GRAY
+                textSize = 30f
+            }
+            
+            drawContext.canvas.nativeCanvas.drawText(maxVal.toInt().toString(), -40f, 0f, axisPaint)
+            drawContext.canvas.nativeCanvas.drawText("0", -40f, size.height, axisPaint)
+            
+            val path = androidx.compose.ui.graphics.Path()
+            
+            filteredDays.forEachIndexed { index, day ->
+                val x = if (filteredDays.size == 1) size.width / 2f else index * xStep
+                val v = when(selectedMetric) {
+                    "Kcal" -> day.kcals
+                    "Protein" -> day.protein
+                    "Carbs" -> day.carbs
+                    else -> day.fat
+                }
+                val y = size.height - ((v / maxVal) * size.height)
+                
+                val shortDate = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date(day.timestamp))
+                drawContext.canvas.nativeCanvas.drawText(shortDate, x - 30f, size.height + 40f, axisPaint)
+                
+                if (index == 0) {
+                    path.moveTo(x, y)
+                } else {
+                    path.lineTo(x, y)
+                }
+            }
+            
+            if (filteredDays.size > 1) {
+                drawPath(
+                    path = path,
+                    color = lineColor,
+                    style = Stroke(width = 8f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+                )
+            }
+            
+            filteredDays.forEachIndexed { index, day ->
+                val x = if (filteredDays.size == 1) size.width / 2f else index * xStep
+                val v = when(selectedMetric) {
+                    "Kcal" -> day.kcals
+                    "Protein" -> day.protein
+                    "Carbs" -> day.carbs
+                    else -> day.fat
+                }
+                val y = size.height - ((v / maxVal) * size.height)
+                drawCircle(color = if (selectedIndex == index) Color.White else lineColor, radius = if (selectedIndex == index) 16f else 10f, center = Offset(x, y))
+            }
+        }
+        
+        selectedIndex?.let { index ->
+            val day = filteredDays[index]
+            val v = when(selectedMetric) {
+                "Kcal" -> day.kcals
+                "Protein" -> day.protein
+                "Carbs" -> day.carbs
+                else -> day.fat
+            }
+            Box(modifier = Modifier.align(Alignment.TopCenter).padding(8.dp)) {
+                Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "$selectedMetric: $v",
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
             }
         }
     }

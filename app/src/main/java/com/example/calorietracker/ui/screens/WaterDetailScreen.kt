@@ -2,6 +2,7 @@ package com.example.calorietracker.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -19,25 +20,26 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import com.example.calorietracker.data.local.WaterEntity
 import com.example.calorietracker.ui.viewmodels.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class WaterDaySum(val date: String, val timestamp: Long, val totalOz: Int)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
     val waterIntake by viewModel.allWater.collectAsState()
     
-    // Group by day
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val groupedWater = waterIntake.groupBy { dateFormat.format(Date(it.timestamp)) }
     
-    data class DaySum(val date: String, val timestamp: Long, val totalOz: Int)
-    
     val daySums = groupedWater.map { (date, dayIntakes) ->
-        DaySum(
+        WaterDaySum(
             date = date,
             timestamp = dayIntakes.first().timestamp,
             totalOz = dayIntakes.sumOf { it.amountOz }
@@ -56,103 +58,69 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .height(240.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-            ) {
-                if (daySums.isEmpty()) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Text("No water data yet", style = MaterialTheme.typography.titleMedium)
+        var selectedTabIndex by remember { mutableStateOf(0) }
+        com.example.calorietracker.ui.components.DayCarousel(
+            days = daySums,
+            getDate = { it.timestamp },
+            modifier = Modifier.padding(paddingValues),
+            emptyMessage = "No water data available."
+        ) { currentDaySum ->
+            Column(modifier = Modifier.fillMaxSize()) {
+                TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(48.dp)) {
+                    Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Water") })
+                    Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
+                }
+                
+                if (selectedTabIndex == 0) {
+                    Box(modifier = Modifier.padding(16.dp)) {
+                        WaterBanner(water = currentDaySum.totalOz, onClick = {})
                     }
                 } else {
-                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(top = 24.dp, bottom = 48.dp, start = 48.dp, end = 24.dp)) {
-                        val maxWater = daySums.maxOfOrNull { it.totalOz }?.toFloat()?.coerceAtLeast(1f) ?: 1f
-                        val barWidth = size.width / (daySums.size * 2f).coerceAtLeast(1f)
-                        val maxBarHeight = size.height
-                        
-                        // Grid lines
-                        val gridLinesCount = 4
-                        for (i in 0..gridLinesCount) {
-                            val yLine = size.height - (i * size.height / gridLinesCount)
-                            drawLine(
-                                color = Color.LightGray.copy(alpha = 0.5f),
-                                start = Offset(0f, yLine),
-                                end = Offset(size.width, yLine),
-                                strokeWidth = 2f
-                            )
-                        }
-
-                        val axisPaint = android.graphics.Paint().apply {
-                            color = android.graphics.Color.GRAY
-                            textSize = 30f
-                        }
-                        
-                        // Y axis labels
-                        drawContext.canvas.nativeCanvas.drawText(maxWater.toInt().toString(), -40f, 0f, axisPaint)
-                        drawContext.canvas.nativeCanvas.drawText("0", -40f, size.height, axisPaint)
-
-                        daySums.forEachIndexed { index, day ->
-                            val barHeight = (day.totalOz / maxWater) * maxBarHeight
-                            val xOffset = index * (barWidth * 2) + barWidth / 2f
-                            val yOffset = size.height - barHeight
-
-                            // X axis labels
-                            val shortDate = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date(day.timestamp))
-                            drawContext.canvas.nativeCanvas.drawText(shortDate, xOffset - 10f, size.height + 40f, axisPaint)
-
-                            drawRoundRect(
-                                color = Color(0xFF00BCD4),
-                                topLeft = Offset(xOffset, yOffset),
-                                size = Size(barWidth, barHeight),
-                                cornerRadius = CornerRadius(12f, 12f)
-                            )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .height(240.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                            WaterHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp)
                         }
                     }
                 }
-            }
-            Text(
-                "Water Log",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-            
-            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-            var waterToDelete by remember { mutableStateOf<WaterEntity?>(null) }
-            
-            if (waterToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = { waterToDelete = null },
-                    title = { Text("Delete Entry") },
-                    text = { Text("Are you sure you want to delete this ${waterToDelete?.amountOz} oz entry?") },
-                    confirmButton = {
-                        TextButton(onClick = { 
-                            viewModel.deleteWater(waterToDelete!!)
-                            waterToDelete = null 
-                        }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { waterToDelete = null }) { Text("Cancel") }
-                    }
+
+                Text(
+                    "Water Log",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
-            }
-            
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                groupedWater.forEach { (date, intakesForDay) ->
-                    item {
-                        Text(date, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
-                    }
+                
+                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                var waterToDelete by remember { mutableStateOf<WaterEntity?>(null) }
+                
+                if (waterToDelete != null) {
+                    AlertDialog(
+                        onDismissRequest = { waterToDelete = null },
+                        title = { Text("Delete Entry") },
+                        text = { Text("Are you sure you want to delete this ${waterToDelete?.amountOz} oz entry?") },
+                        confirmButton = {
+                            TextButton(onClick = { 
+                                viewModel.deleteWater(waterToDelete!!)
+                                waterToDelete = null 
+                            }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { waterToDelete = null }) { Text("Cancel") }
+                        }
+                    )
+                }
+                
+                val intakesForDay = groupedWater[currentDaySum.date] ?: emptyList()
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     items(intakesForDay, key = { it.id }) { water ->
                         var waterToEdit by remember { mutableStateOf<WaterEntity?>(null) }
                         
@@ -227,6 +195,109 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WaterHistoryGraph(
+    daySums: List<WaterDaySum>, 
+    endingAt: Long
+) {
+    if (daySums.isEmpty()) return
+    
+    val allSorted = daySums.sortedBy { it.timestamp }
+    val idx = allSorted.indexOfFirst { it.timestamp == endingAt }
+    
+    val filteredDays = if (idx != -1) {
+        val start = maxOf(0, idx - 3)
+        val end = minOf(allSorted.size, start + 7)
+        val adjustedStart = maxOf(0, end - 7)
+        allSorted.subList(adjustedStart, end)
+    } else {
+        allSorted.takeLast(7)
+    }
+    
+    var selectedIndex by remember(endingAt, filteredDays) { 
+        val i = filteredDays.indexOfFirst { it.timestamp == endingAt }
+        mutableStateOf<Int?>(if (i != -1) i else null) 
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+            val canvasSize = this.size
+            detectTapGestures { tapOffset ->
+                val barWidth = canvasSize.width.toFloat() / (filteredDays.size * 2f).coerceAtLeast(1f)
+                
+                var closestIdx = -1
+                var minDistance = Float.MAX_VALUE
+                
+                filteredDays.forEachIndexed { index, _ ->
+                    val xOffset = index * (barWidth * 2) + barWidth / 2f + barWidth / 2f
+                    val dist = kotlin.math.abs(tapOffset.x - xOffset)
+                    if (dist < minDistance && dist < barWidth * 2) {
+                        minDistance = dist
+                        closestIdx = index
+                    }
+                }
+                selectedIndex = if (closestIdx != -1) closestIdx else null
+            }
+        }) {
+            val maxWater = filteredDays.maxOfOrNull { it.totalOz }?.toFloat()?.coerceAtLeast(1f) ?: 1f
+            val barWidth = size.width / (filteredDays.size * 2f).coerceAtLeast(1f)
+            val maxBarHeight = size.height
+            
+            // Grid lines
+            val gridLinesCount = 4
+            for (i in 0..gridLinesCount) {
+                val yLine = size.height - (i * size.height / gridLinesCount)
+                drawLine(
+                    color = Color.LightGray.copy(alpha = 0.5f),
+                    start = Offset(0f, yLine),
+                    end = Offset(size.width, yLine),
+                    strokeWidth = 2f
+                )
+            }
+
+            val axisPaint = android.graphics.Paint().apply {
+                color = android.graphics.Color.GRAY
+                textSize = 30f
+            }
+            
+            drawContext.canvas.nativeCanvas.drawText(maxWater.toInt().toString(), -40f, 0f, axisPaint)
+            drawContext.canvas.nativeCanvas.drawText("0", -40f, size.height, axisPaint)
+
+            filteredDays.forEachIndexed { index, day ->
+                val barHeight = (day.totalOz / maxWater) * maxBarHeight
+                val xOffset = index * (barWidth * 2) + barWidth / 2f
+                val yOffset = size.height - barHeight
+
+                val shortDate = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date(day.timestamp))
+                drawContext.canvas.nativeCanvas.drawText(shortDate, xOffset - 10f, size.height + 40f, axisPaint)
+
+                drawRoundRect(
+                    color = if (selectedIndex == index) Color.White else Color(0xFF00BCD4),
+                    topLeft = Offset(xOffset, yOffset),
+                    size = Size(barWidth, barHeight),
+                    cornerRadius = CornerRadius(12f, 12f)
+                )
+            }
+        }
+        
+        selectedIndex?.let { index ->
+            val day = filteredDays[index]
+            Box(modifier = Modifier.align(Alignment.TopCenter).padding(8.dp)) {
+                Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "${day.totalOz} oz",
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
                 }
             }
         }

@@ -17,8 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.calorietracker.data.local.DailyScoreEntity
 import com.example.calorietracker.ui.viewmodels.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,60 +77,75 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     Text("AI is analyzing yesterday's logs...", style = MaterialTheme.typography.bodyLarge)
                 }
             }
-        } else if (scores.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No scores available. Ensure you logged food/water yesterday.", modifier = Modifier.padding(16.dp))
-            }
         } else {
-            val latestScore = scores.first()
+            var selectedTabIndex by remember { mutableStateOf(0) }
+            com.example.calorietracker.ui.components.DayCarousel(
+                days = scores,
+                getDate = { it.dateTimestamp },
+                modifier = Modifier.padding(paddingValues),
+                emptyMessage = "No scores available. Ensure you logged food/water yesterday."
+            ) { currentScore ->
+                Column(modifier = Modifier.fillMaxSize()) {
+                    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(48.dp)) {
+                        Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Score") })
+                        Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
+                    }
+                    
+                    if (selectedTabIndex == 0) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            Text("Score Breakdown", style = MaterialTheme.typography.titleLarge)
+                            
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                ScoreRingCard(title = "Overall Score", score = currentScore.overallScore, modifier = Modifier.weight(1f), isOverall = true)
+                                ScoreRingCard(title = "Clean Diet", score = currentScore.cleanScore, modifier = Modifier.weight(1f))
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                ScoreRingCard(title = "Macros", score = currentScore.macroScore, modifier = Modifier.weight(1f))
+                                ScoreRingCard(title = "Calories", score = currentScore.calorieScore, modifier = Modifier.weight(1f))
+                            }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                ScoreRingCard(title = "Hydration", score = currentScore.waterScore, modifier = Modifier.weight(1f))
+                                ScoreRingCard(title = "Meal Balance", score = currentScore.balanceScore, modifier = Modifier.weight(1f))
+                            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                Text("Score Breakdown", style = MaterialTheme.typography.titleLarge)
-                
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ScoreRingCard(title = "Overall Score", score = latestScore.overallScore, modifier = Modifier.weight(1f), isOverall = true)
-                    ScoreRingCard(title = "Clean Diet", score = latestScore.cleanScore, modifier = Modifier.weight(1f))
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ScoreRingCard(title = "Macros", score = latestScore.macroScore, modifier = Modifier.weight(1f))
-                    ScoreRingCard(title = "Calories", score = latestScore.calorieScore, modifier = Modifier.weight(1f))
-                }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ScoreRingCard(title = "Hydration", score = latestScore.waterScore, modifier = Modifier.weight(1f))
-                    ScoreRingCard(title = "Meal Balance", score = latestScore.balanceScore, modifier = Modifier.weight(1f))
-                }
-
-                // AI Feedback
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("AI Feedback", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(latestScore.feedback, style = MaterialTheme.typography.bodyMedium)
+                            // AI Feedback
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text("AI Feedback", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(currentScore.feedback, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(32.dp))
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text("Score History", style = MaterialTheme.typography.titleLarge)
+                            Card(
+                                modifier = Modifier.fillMaxWidth().height(250.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                                    ScoreHistoryGraph(scores = scores, endingAt = currentScore.dateTimestamp)
+                                }
+                            }
+                        }
                     }
                 }
-
-                // History Graph
-                Text("Score History", style = MaterialTheme.typography.titleLarge)
-                Card(
-                    modifier = Modifier.fillMaxWidth().height(250.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                        ScoreHistoryGraph(scores = scores)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
@@ -180,75 +198,130 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOv
                 )
             }
         }
-    }
+}
 }
 
 @Composable
-fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailyScoreEntity>) {
+fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailyScoreEntity>, endingAt: Long? = null) {
     if (scores.isEmpty()) return
-    val sortedScores = scores.sortedBy { it.dateTimestamp }.takeLast(7)
+    
+    val allSorted = scores.sortedBy { it.dateTimestamp }
+    val idx = if (endingAt != null) allSorted.indexOfFirst { it.dateTimestamp == endingAt } else -1
+    
+    val sortedScores = if (idx != -1) {
+        val start = maxOf(0, idx - 3)
+        val end = minOf(allSorted.size, start + 7)
+        val adjustedStart = maxOf(0, end - 7)
+        allSorted.subList(adjustedStart, end)
+    } else {
+        allSorted.takeLast(7)
+    }
+    
     val maxScore = 100f
-    
     val lineColor = MaterialTheme.colorScheme.tertiary
+    var selectedIndex by remember(endingAt, sortedScores) { 
+        val initialSelection = if (endingAt != null) {
+            val i = sortedScores.indexOfFirst { it.dateTimestamp == endingAt }
+            if (i != -1) i else null
+        } else null
+        mutableStateOf<Int?>(initialSelection) 
+    }
     
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val padding = 20f
-        val bottomPadding = 60f
-        val topPadding = 40f
-        
-        val width = size.width - padding * 2
-        val height = size.height - topPadding - bottomPadding
-        
-        val startX = padding + 60f 
-        val startY = topPadding
-        
-        val gridColor = Color.Gray.copy(alpha = 0.3f)
-        val textPaint = android.graphics.Paint().apply {
-            color = android.graphics.Color.GRAY
-            textSize = 35f
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+            detectTapGestures { tapOffset ->
+                val padding = 20f
+                val startX = padding + 60f 
+                val graphWidth = size.width - padding - startX
+                val pointSpacing = if (sortedScores.size > 1) graphWidth / (sortedScores.size - 1) else graphWidth / 2
+                
+                var closestIdx = -1
+                var minDistance = Float.MAX_VALUE
+                
+                sortedScores.forEachIndexed { index, _ ->
+                    val x = startX + (if (sortedScores.size > 1) index * pointSpacing else graphWidth / 2)
+                    val dist = kotlin.math.abs(tapOffset.x - x)
+                    if (dist < minDistance && dist < 100f) {
+                        minDistance = dist
+                        closestIdx = index
+                    }
+                }
+                selectedIndex = if (closestIdx != -1) closestIdx else null
+            }
+        }) {
+            val padding = 20f
+            val bottomPadding = 60f
+            val topPadding = 40f
+            
+            val width = size.width - padding * 2
+            val height = size.height - topPadding - bottomPadding
+            
+            val startX = padding + 60f 
+            val startY = topPadding
+            
+            val gridColor = Color.Gray.copy(alpha = 0.3f)
+            val textPaint = android.graphics.Paint().apply {
+                color = android.graphics.Color.GRAY
+                textSize = 35f
+            }
+            
+            drawLine(gridColor, start = Offset(startX, startY), end = Offset(size.width - padding, startY))
+            drawContext.canvas.nativeCanvas.drawText("100", padding, startY + 10f, textPaint)
+            
+            drawLine(gridColor, start = Offset(startX, startY + height / 2), end = Offset(size.width - padding, startY + height / 2))
+            drawContext.canvas.nativeCanvas.drawText("50", padding, startY + height / 2 + 10f, textPaint)
+            
+            drawLine(gridColor, start = Offset(startX, startY + height), end = Offset(size.width - padding, startY + height))
+            drawContext.canvas.nativeCanvas.drawText("0", padding, startY + height + 10f, textPaint)
+            
+            val graphWidth = size.width - padding - startX
+            val pointSpacing = if (sortedScores.size > 1) graphWidth / (sortedScores.size - 1) else graphWidth / 2
+            
+            val points = sortedScores.mapIndexed { index, score ->
+                val x = startX + (if (sortedScores.size > 1) index * pointSpacing else graphWidth / 2)
+                val y = startY + height - ((score.overallScore / maxScore) * height)
+                Offset(x, y)
+            }
+            
+            val timeFormat = java.text.SimpleDateFormat("MM/dd", java.util.Locale.getDefault())
+            points.forEachIndexed { index, point ->
+                val dateText = timeFormat.format(java.util.Date(sortedScores[index].dateTimestamp))
+                drawContext.canvas.nativeCanvas.drawText(dateText, point.x - 30f, startY + height + 50f, textPaint)
+            }
+            
+            for (i in 0 until points.size - 1) {
+                drawLine(
+                    color = lineColor,
+                    start = points[i],
+                    end = points[i + 1],
+                    strokeWidth = 4f,
+                    cap = StrokeCap.Round
+                )
+            }
+            
+            points.forEachIndexed { index, point ->
+                drawCircle(
+                    color = if (selectedIndex == index) Color.White else lineColor,
+                    radius = if (selectedIndex == index) 12f else 8f,
+                    center = point
+                )
+            }
         }
         
-        // Y-axis grid & labels
-        drawLine(gridColor, start = Offset(startX, startY), end = Offset(size.width - padding, startY))
-        drawContext.canvas.nativeCanvas.drawText("100", padding, startY + 10f, textPaint)
-        
-        drawLine(gridColor, start = Offset(startX, startY + height / 2), end = Offset(size.width - padding, startY + height / 2))
-        drawContext.canvas.nativeCanvas.drawText("50", padding, startY + height / 2 + 10f, textPaint)
-        
-        drawLine(gridColor, start = Offset(startX, startY + height), end = Offset(size.width - padding, startY + height))
-        drawContext.canvas.nativeCanvas.drawText("0", padding, startY + height + 10f, textPaint)
-        
-        val graphWidth = size.width - padding - startX
-        val pointSpacing = if (sortedScores.size > 1) graphWidth / (sortedScores.size - 1) else graphWidth / 2
-        
-        val points = sortedScores.mapIndexed { index, score ->
-            val x = startX + (if (sortedScores.size > 1) index * pointSpacing else graphWidth / 2)
-            val y = startY + height - ((score.overallScore / maxScore) * height)
-            Offset(x, y)
-        }
-        
-        val timeFormat = java.text.SimpleDateFormat("MM/dd", java.util.Locale.getDefault())
-        points.forEachIndexed { index, point ->
-            val dateText = timeFormat.format(java.util.Date(sortedScores[index].dateTimestamp))
-            drawContext.canvas.nativeCanvas.drawText(dateText, point.x - 30f, startY + height + 50f, textPaint)
-        }
-        
-        for (i in 0 until points.size - 1) {
-            drawLine(
-                color = lineColor,
-                start = points[i],
-                end = points[i + 1],
-                strokeWidth = 4f,
-                cap = StrokeCap.Round
-            )
-        }
-        
-        points.forEach { point ->
-            drawCircle(
-                color = lineColor,
-                radius = 8f,
-                center = point
-            )
+        selectedIndex?.let { index ->
+            val score = sortedScores[index]
+            Box(modifier = Modifier.align(Alignment.TopCenter).padding(8.dp)) {
+                Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Score: ${score.overallScore}",
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
         }
     }
 }
