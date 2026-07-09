@@ -137,9 +137,7 @@ class MainViewModel(
                     var mealResolved = false
                     
                     // Tier 1: Full Meal FDA Search
-                    // We only attempt a full meal search if Gemini did not provide an ingredient breakdown.
-                    // This ensures that complex meals (like a cheeseburger) are kept separated so you can see each ingredient in the UI.
-                    if (fdaKey.isNotBlank() && data.fda_search_term.isNotBlank() && data.fallback_ingredients.isEmpty()) {
+                    if (fdaKey.isNotBlank() && data.fda_search_term.isNotBlank()) {
                         val fdaData = fdaClient.searchFoodStructured(fdaKey, data.fda_search_term)
                         if (fdaData != null) {
                             compiledItems.add(
