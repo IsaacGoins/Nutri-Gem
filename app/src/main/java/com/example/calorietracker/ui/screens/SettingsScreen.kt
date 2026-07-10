@@ -281,12 +281,14 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 val context = LocalContext.current
+                val secondaryBtnColor = AppColors.getSecondaryButtonColor(viewModel)
                 Button(
                     onClick = { 
                         viewModel.resetColorPreferences()
                         Toast.makeText(context, "Developer settings reset to defaults", Toast.LENGTH_SHORT).show()
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnColor, contentColor = contentColorFor(secondaryBtnColor))
                 ) {
                     Text("Reset Developer Settings to Defaults")
                 }
