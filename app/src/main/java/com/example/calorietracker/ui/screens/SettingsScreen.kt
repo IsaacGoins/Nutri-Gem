@@ -210,10 +210,10 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 
                 val mappingKeys = listOf(
                     "COLOR_HERO_BANNER" to "Hero Banner",
-                    "COLOR_SCORE_BANNER" to "Score Banner",
+                    "COLOR_SCORE_BANNER" to "Score Banner & Graph",
                     "COLOR_MEAL_BANNER" to "Meal Banner",
-                    "COLOR_WATER_BANNER" to "Water Banner",
-                    "COLOR_WEIGHT_BANNER" to "Weight Banner",
+                    "COLOR_WATER_BANNER" to "Water Banner & Graph",
+                    "COLOR_WEIGHT_BANNER" to "Weight Banner & Graph",
                     "COLOR_PRIMARY_BUTTON" to "Primary Button",
                     "COLOR_SECONDARY_BUTTON" to "Secondary Button",
                     "COLOR_CARD_BACKGROUND" to "Card Background",
