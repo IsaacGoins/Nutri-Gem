@@ -63,12 +63,14 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedButton(
+            val secondaryBtnColor = AppColors.getSecondaryButtonColor(viewModel)
+            Button(
                 onClick = { 
                     viewModel.saveApiKey(inputKey) 
                     Toast.makeText(context, "Gemini Key has been saved", Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnColor, contentColor = contentColorFor(secondaryBtnColor))
             ) {
                 Text("Save Gemini Key")
             }
@@ -88,12 +90,13 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedButton(
+            Button(
                 onClick = { 
                     viewModel.saveFdaApiKey(inputFdaKey) 
                     Toast.makeText(context, "FDA Key has been saved", Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnColor, contentColor = contentColorFor(secondaryBtnColor))
             ) {
                 Text("Save FDA Key")
             }
