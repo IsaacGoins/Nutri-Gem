@@ -98,8 +98,20 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
             ) { currentDaySum ->
                 Column(modifier = Modifier.fillMaxSize()) {
                     TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(40.dp)) {
-                        Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Logs") })
-                        Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
+                        Tab(
+                            selected = selectedTabIndex == 0, 
+                            onClick = { selectedTabIndex = 0 }, 
+                            text = { Text("Daily Logs") },
+                            selectedContentColor = MaterialTheme.colorScheme.primary,
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Tab(
+                            selected = selectedTabIndex == 1, 
+                            onClick = { selectedTabIndex = 1 }, 
+                            text = { Text("History Graph") },
+                            selectedContentColor = MaterialTheme.colorScheme.primary,
+                            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     
                     if (selectedTabIndex == 0) {
