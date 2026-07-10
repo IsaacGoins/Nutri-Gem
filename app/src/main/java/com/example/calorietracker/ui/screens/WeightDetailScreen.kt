@@ -231,29 +231,12 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             }
             
             if (weightToEdit != null) {
-                var weightInput by remember { mutableStateOf(weightToEdit!!.weightLbs.toString()) }
-                AlertDialog(
-                    onDismissRequest = { weightToEdit = null },
-                    title = { Text("Edit Weight") },
-                    text = {
-                        OutlinedTextField(
-                            value = weightInput,
-                            onValueChange = { weightInput = it },
-                            label = { Text("Weight (lbs)") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            singleLine = true
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            weightInput.toFloatOrNull()?.let {
-                                viewModel.updateWeight(weightToEdit!!.copy(weightLbs = it))
-                            }
-                            weightToEdit = null
-                        }) { Text("Save") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { weightToEdit = null }) { Text("Cancel") }
+                EditWeightDialog(
+                    weight = weightToEdit!!,
+                    onDismiss = { weightToEdit = null },
+                    onSave = { updatedWeight ->
+                        viewModel.updateWeight(updatedWeight)
+                        weightToEdit = null
                     }
                 )
             }
@@ -386,4 +369,102 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditWeightDialog(weight: com.example.calorietracker.data.local.WeightEntity, onDismiss: () -> Unit, onSave: (com.example.calorietracker.data.local.WeightEntity) -> Unit) {
+    var weightInput by remember { mutableStateOf(weight.weightLbs.toString()) }
+    var editedTimestamp by remember { mutableStateOf(weight.timestamp) }
+    val context = LocalContext.current
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = editedTimestamp)
+    val timePickerState = rememberTimePickerState(
+        initialHour = java.text.SimpleDateFormat("HH", java.util.Locale.getDefault()).format(java.util.Date(editedTimestamp)).toInt(),
+        initialMinute = java.text.SimpleDateFormat("mm", java.util.Locale.getDefault()).format(java.util.Date(editedTimestamp)).toInt()
+    )
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDatePicker = false
+                    showTimePicker = true
+                }) { Text("Next") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    if (showTimePicker) {
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showTimePicker = false
+                    val localCalendar = java.util.Calendar.getInstance()
+                    val selectedUtc = datePickerState.selectedDateMillis
+                    if (selectedUtc != null) {
+                        val utcCalendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
+                        utcCalendar.timeInMillis = selectedUtc
+                        localCalendar.set(
+                            utcCalendar.get(java.util.Calendar.YEAR),
+                            utcCalendar.get(java.util.Calendar.MONTH),
+                            utcCalendar.get(java.util.Calendar.DAY_OF_MONTH)
+                        )
+                    }
+                    localCalendar.set(java.util.Calendar.HOUR_OF_DAY, timePickerState.hour)
+                    localCalendar.set(java.util.Calendar.MINUTE, timePickerState.minute)
+                    editedTimestamp = localCalendar.timeInMillis
+                }) { Text("Confirm") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+            },
+            text = { TimePicker(state = timePickerState) }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Weight") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = weightInput,
+                    onValueChange = { weightInput = it },
+                    label = { Text("Weight (lbs)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Time: " + java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault()).format(java.util.Date(editedTimestamp)))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                val parsedWeight = weightInput.toFloatOrNull()
+                if (parsedWeight != null && parsedWeight > 0f) {
+                    onSave(weight.copy(weightLbs = parsedWeight, timestamp = editedTimestamp))
+                    Toast.makeText(context, "Weight log has been saved", Toast.LENGTH_SHORT).show()
+                }
+            }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
