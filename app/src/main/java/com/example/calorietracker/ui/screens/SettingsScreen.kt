@@ -63,14 +63,14 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
-            val secondaryBtnColor = AppColors.getSecondaryButtonColor(viewModel)
+            val primaryBtnColor = AppColors.getPrimaryButtonColor(viewModel)
             Button(
                 onClick = { 
                     viewModel.saveApiKey(inputKey) 
                     Toast.makeText(context, "Gemini Key has been saved", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnColor, contentColor = contentColorFor(secondaryBtnColor))
+                colors = ButtonDefaults.buttonColors(containerColor = primaryBtnColor, contentColor = contentColorFor(primaryBtnColor))
             ) {
                 Text("Save Gemini Key")
             }
@@ -96,7 +96,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     Toast.makeText(context, "FDA Key has been saved", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = secondaryBtnColor, contentColor = contentColorFor(secondaryBtnColor))
+                colors = ButtonDefaults.buttonColors(containerColor = primaryBtnColor, contentColor = contentColorFor(primaryBtnColor))
             ) {
                 Text("Save FDA Key")
             }
@@ -177,7 +177,6 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             )
             
             Spacer(modifier = Modifier.height(24.dp))
-            val primaryBtnColor = AppColors.getPrimaryButtonColor(viewModel)
             Button(
                 onClick = { 
                     viewModel.saveAge(inputAge.toIntOrNull() ?: 30)
