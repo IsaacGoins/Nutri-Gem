@@ -221,7 +221,8 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     "Buttons & Interactions" to listOf(
                         "COLOR_PRIMARY_BUTTON" to "Primary Button",
                         "COLOR_SECONDARY_BUTTON" to "Secondary Button",
-                        "COLOR_SWIPE_DELETE_BACKGROUND" to "Swipe Delete Background"
+                        "COLOR_SWIPE_DELETE_BACKGROUND" to "Swipe Delete Background",
+                        "COLOR_SWIPE_EDIT_BACKGROUND" to "Swipe Edit Background"
                     ),
                     "Graphs & Data Visualization" to listOf(
                         "COLOR_GRAPH_HIGHLIGHT" to "Graph Highlight",

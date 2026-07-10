@@ -205,8 +205,8 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                             state = dismissState,
                             backgroundContent = {
                                 val color = when (dismissState.dismissDirection) {
-                                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                                    SwipeToDismissBoxValue.StartToEnd -> AppColors.getSwipeEditBackgroundColor(viewModel)
+                                    SwipeToDismissBoxValue.EndToStart -> AppColors.getSwipeDeleteBackgroundColor(viewModel)
                                     else -> Color.Transparent
                                 }
                                 val icon = when (dismissState.dismissDirection) {
@@ -438,7 +438,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
                         val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-                            MaterialTheme.colorScheme.error
+                            AppColors.getSwipeDeleteBackgroundColor(viewModel)
                         } else {
                             Color.Transparent
                         }
@@ -545,7 +545,7 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
                         val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-                            MaterialTheme.colorScheme.error
+                            AppColors.getSwipeDeleteBackgroundColor(viewModel)
                         } else {
                             Color.Transparent
                         }

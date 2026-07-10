@@ -170,7 +170,7 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             state = dismissState,
                             backgroundContent = {
                                 val color = when (dismissState.dismissDirection) {
-                                    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+                                    SwipeToDismissBoxValue.StartToEnd -> AppColors.getSwipeEditBackgroundColor(viewModel)
                                     SwipeToDismissBoxValue.EndToStart -> AppColors.getSwipeDeleteBackgroundColor(viewModel)
                                     else -> Color.Transparent
                                 }

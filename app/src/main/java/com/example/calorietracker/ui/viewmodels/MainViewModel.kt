@@ -101,7 +101,8 @@ class MainViewModel(
             "COLOR_SCORE_HISTORY_LINE" to "Tertiary",
             "COLOR_WATER_GRAPH_BAR" to "OnPrimaryContainer",
             "COLOR_WEIGHT_GRAPH_LINE" to "Primary",
-            "COLOR_SWIPE_DELETE_BACKGROUND" to "Error"
+            "COLOR_SWIPE_DELETE_BACKGROUND" to "Error",
+            "COLOR_SWIPE_EDIT_BACKGROUND" to "Primary"
         )
     }
 

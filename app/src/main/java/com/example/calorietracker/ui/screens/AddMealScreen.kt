@@ -108,7 +108,7 @@ fun AddMealScreen(
                                         enableDismissFromStartToEnd = false,
                                         backgroundContent = {
                                             val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-                                                MaterialTheme.colorScheme.error
+                                                AppColors.getSwipeDeleteBackgroundColor(viewModel)
                                             } else {
                                                 Color.Transparent
                                             }
