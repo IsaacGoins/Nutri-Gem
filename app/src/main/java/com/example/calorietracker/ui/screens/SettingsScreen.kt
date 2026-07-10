@@ -273,12 +273,17 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             }
                         }
                     }
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
+                val context = LocalContext.current
                 Button(
-                    onClick = { viewModel.resetColorPreferences() },
+                    onClick = { 
+                        viewModel.resetColorPreferences()
+                        Toast.makeText(context, "Developer settings reset to defaults", Toast.LENGTH_SHORT).show()
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Reset Developer Settings to Defaults")
@@ -288,5 +293,4 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
-}
 }
