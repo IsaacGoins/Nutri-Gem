@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.calorietracker.ui.theme.AppColors
 import com.example.calorietracker.ui.screens.*
 import com.example.calorietracker.ui.viewmodels.MainViewModel
 import com.example.calorietracker.ui.viewmodels.MainViewModelFactory
@@ -135,31 +136,33 @@ fun AppNavigation() {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            val secondaryFabColor = AppColors.getSecondaryButtonColor(viewModel)
                             SmallFloatingActionButton(
                                 onClick = { showCustomWaterDialog = true; waterDialExpanded = false },
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                containerColor = secondaryFabColor
                             ) {
-                                Text("C", style = MaterialTheme.typography.labelMedium)
+                                Text("C", style = MaterialTheme.typography.labelMedium, color = contentColorFor(secondaryFabColor))
                             }
                             SmallFloatingActionButton(
                                 onClick = { viewModel.addWater(16); waterDialExpanded = false },
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                containerColor = secondaryFabColor
                             ) {
-                                Text("16", style = MaterialTheme.typography.labelMedium)
+                                Text("16", style = MaterialTheme.typography.labelMedium, color = contentColorFor(secondaryFabColor))
                             }
                             SmallFloatingActionButton(
                                 onClick = { viewModel.addWater(8); waterDialExpanded = false },
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                containerColor = secondaryFabColor
                             ) {
-                                Text("8", style = MaterialTheme.typography.labelMedium)
+                                Text("8", style = MaterialTheme.typography.labelMedium, color = contentColorFor(secondaryFabColor))
                             }
                         }
                     }
                     
+                    val primaryFabColor = AppColors.getPrimaryButtonColor(viewModel)
                     FloatingActionButton(
                         onClick = { waterDialExpanded = !waterDialExpanded },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        containerColor = primaryFabColor,
+                        contentColor = contentColorFor(primaryFabColor)
                     ) {
                         Icon(Icons.Default.LocalDrink, contentDescription = "Add Water")
                     }
@@ -168,11 +171,12 @@ fun AppNavigation() {
 
                 // Add Meal FAB
                 if (currentRoute == "home" || currentRoute == "meals") {
+                    val primaryFabColor = AppColors.getPrimaryButtonColor(viewModel)
                     ExtendedFloatingActionButton(
                         onClick = { navController.navigate("add_meal") },
                         modifier = Modifier.align(Alignment.BottomEnd),
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        containerColor = primaryFabColor,
+                        contentColor = contentColorFor(primaryFabColor),
                         icon = { Icon(Icons.Default.Add, contentDescription = null) },
                         text = { Text("Add Meal") }
                     )

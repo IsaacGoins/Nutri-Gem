@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.data.local.WeightEntity
 import com.example.calorietracker.ui.viewmodels.MainViewModel
+import com.example.calorietracker.ui.theme.AppColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,10 +65,11 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             )
         },
         floatingActionButton = {
+            val fabColor = AppColors.getPrimaryButtonColor(viewModel)
             ExtendedFloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
+                containerColor = fabColor,
+                contentColor = contentColorFor(fabColor)
             ) {
                 Text("Log Weight")
             }
@@ -94,7 +97,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     val diffText = if (diff > 0) "${String.format("%.1f", diff)} lbs to go!" else if (diff < 0) "Goal passed by ${String.format("%.1f", -diff)} lbs!" else "Goal reached!"
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clickable { showGoalDialog = true },
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                        colors = CardDefaults.cardColors(containerColor = AppColors.getCardBackgroundColor(viewModel))
                     ) {
                         Text("Goal: $weightGoal lbs | Current: $currentWeight lbs\n$diffText", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
                     }
@@ -107,8 +110,8 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .height(240.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = AppColors.getWeightBannerColor(viewModel),
+                    contentColor = contentColorFor(AppColors.getWeightBannerColor(viewModel))
                 )
             ) {
                 if (daySums.isEmpty()) {
@@ -329,12 +332,16 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                                 }
                             }
                         ) {
-                            Card(modifier = Modifier.fillMaxWidth()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = AppColors.getCardBackgroundColor(viewModel))
+                            ) {
                                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text("${weight.weightLbs} lbs", style = MaterialTheme.typography.titleMedium)
                                         Text(timeFormat.format(Date(weight.timestamp)), style = MaterialTheme.typography.bodySmall)
                                     }
+                                    Icon(Icons.Default.MonitorWeight, contentDescription = "Weight", tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }

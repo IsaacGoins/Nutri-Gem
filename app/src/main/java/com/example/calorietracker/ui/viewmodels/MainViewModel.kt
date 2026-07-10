@@ -32,6 +32,16 @@ class MainViewModel(
     private val _weightGoal = MutableStateFlow(secureStorage.getWeightGoal())
     val weightGoal: StateFlow<Float> = _weightGoal
 
+    private val _devSettingsEnabled = MutableStateFlow(secureStorage.getDevSettingsEnabled())
+    val devSettingsEnabled: StateFlow<Boolean> = _devSettingsEnabled
+
+    private val _colorPreferences = MutableStateFlow<Map<String, String>>(emptyMap())
+    val colorPreferences: StateFlow<Map<String, String>> = _colorPreferences
+
+    init {
+        loadColorPreferences()
+    }
+
     private val startOfDay: Long
         get() {
             val calendar = Calendar.getInstance()
@@ -68,6 +78,46 @@ class MainViewModel(
     fun saveWeightGoal(weight: Float) {
         secureStorage.saveWeightGoal(weight)
         _weightGoal.value = weight
+    }
+
+    fun saveDevSettingsEnabled(enabled: Boolean) {
+        secureStorage.saveDevSettingsEnabled(enabled)
+        _devSettingsEnabled.value = enabled
+    }
+
+    private fun loadColorPreferences() {
+        val keys = listOf(
+            "COLOR_HERO_BANNER",
+            "COLOR_SCORE_BANNER",
+            "COLOR_MEAL_BANNER",
+            "COLOR_WATER_BANNER",
+            "COLOR_WEIGHT_BANNER",
+            "COLOR_PRIMARY_BUTTON",
+            "COLOR_SECONDARY_BUTTON",
+            "COLOR_CARD_BACKGROUND",
+            "COLOR_GRAPH_HIGHLIGHT"
+        )
+        val defaultTokens = mapOf(
+            "COLOR_HERO_BANNER" to "SurfaceVariant",
+            "COLOR_SCORE_BANNER" to "TertiaryContainer",
+            "COLOR_MEAL_BANNER" to "SecondaryContainer",
+            "COLOR_WATER_BANNER" to "PrimaryContainer",
+            "COLOR_WEIGHT_BANNER" to "Secondary",
+            "COLOR_PRIMARY_BUTTON" to "Primary",
+            "COLOR_SECONDARY_BUTTON" to "Secondary",
+            "COLOR_CARD_BACKGROUND" to "SurfaceVariant",
+            "COLOR_GRAPH_HIGHLIGHT" to "Primary"
+        )
+        
+        val map = keys.associateWith { key ->
+            secureStorage.getColorPreference(key, defaultTokens[key] ?: "Primary")
+        }
+        _colorPreferences.value = map
+    }
+
+    fun saveColorPreference(key: String, token: String) {
+        secureStorage.saveColorPreference(key, token)
+        _colorPreferences.value = _colorPreferences.value.toMutableMap().apply { put(key, token) }
     }
 
     private val _age = MutableStateFlow(secureStorage.getAge())

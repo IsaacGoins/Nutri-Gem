@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import com.example.calorietracker.data.local.WaterEntity
 import com.example.calorietracker.ui.viewmodels.MainViewModel
+import com.example.calorietracker.ui.theme.AppColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,14 +70,14 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             emptyMessage = "No water data available."
         ) { currentDaySum ->
             Column(modifier = Modifier.fillMaxSize()) {
-                TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(48.dp)) {
+                TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(40.dp)) {
                     Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Water") })
                     Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
                 }
                 
                 if (selectedTabIndex == 0) {
                     Box(modifier = Modifier.padding(16.dp)) {
-                        WaterBanner(water = currentDaySum.totalOz, onClick = {})
+                        WaterBanner(water = currentDaySum.totalOz, backgroundColor = AppColors.getWaterBannerColor(viewModel), onClick = {})
                     }
                 } else {
                     Card(
@@ -83,7 +85,7 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             .fillMaxWidth()
                             .padding(16.dp)
                             .height(240.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                        colors = CardDefaults.cardColors(containerColor = AppColors.getWaterBannerColor(viewModel))
                     ) {
                         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                             WaterHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp)
@@ -186,13 +188,15 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { waterToEdit = water }
+                                    .clickable { waterToEdit = water },
+                                colors = CardDefaults.cardColors(containerColor = AppColors.getCardBackgroundColor(viewModel))
                             ) {
                                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text("${water.amountOz} oz", style = MaterialTheme.typography.titleMedium)
                                         Text(timeFormat.format(Date(water.timestamp)), style = MaterialTheme.typography.bodySmall)
                                     }
+                                    Icon(Icons.Default.LocalDrink, contentDescription = "Water", tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }

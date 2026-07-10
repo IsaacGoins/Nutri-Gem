@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.MainViewModel
+import com.example.calorietracker.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -72,7 +73,7 @@ fun HomeScreen(
                 // Score Banner
                 if (scores.isNotEmpty()) {
                     val latestScore = scores.first()
-                    ScoreBanner(score = latestScore.overallScore, onClick = onNavigateToScore)
+                    ScoreBanner(score = latestScore.overallScore, backgroundColor = AppColors.getScoreBannerColor(viewModel), onClick = onNavigateToScore)
                 }
 
                 HeroSection(
@@ -80,25 +81,26 @@ fun HomeScreen(
                     protein = protein ?: 0,
                     carbs = carbs ?: 0,
                     fat = fat ?: 0,
+                    backgroundColor = AppColors.getHeroBannerColor(viewModel),
                     onClick = onNavigateToMeals
                 )
 
-                WaterBanner(water = water ?: 0, onClick = onNavigateToWater)
+                WaterBanner(water = water ?: 0, backgroundColor = AppColors.getWaterBannerColor(viewModel), onClick = onNavigateToWater)
                 
-                WeightBanner(weight = currentWeight, onClick = onNavigateToWeight)
+                WeightBanner(weight = currentWeight, backgroundColor = AppColors.getWeightBannerColor(viewModel), onClick = onNavigateToWeight)
             }
         }
     }
 }
 
 @Composable
-fun ScoreBanner(score: Int, onClick: () -> Unit) {
+fun ScoreBanner(score: Int, backgroundColor: Color, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Row(
             modifier = Modifier.padding(24.dp).fillMaxWidth(),
@@ -106,23 +108,23 @@ fun ScoreBanner(score: Int, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("Yesterday's Score", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onTertiaryContainer)
-                Text("View Insights", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
+                Text("Yesterday's Score", style = MaterialTheme.typography.titleMedium, color = contentColorFor(backgroundColor = backgroundColor))
+                Text("View Insights", style = MaterialTheme.typography.bodyMedium, color = contentColorFor(backgroundColor = backgroundColor).copy(alpha = 0.7f))
             }
-            Text("$score/100", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer)
+            Text("$score/100", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = contentColorFor(backgroundColor = backgroundColor))
         }
     }
 }
 
 
 @Composable
-fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, onClick: () -> Unit) {
+fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, backgroundColor: Color, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -188,15 +190,15 @@ fun MacroLegend(color: Color, label: String, amount: String) {
 }
 
 @Composable
-fun WaterBanner(water: Int, onClick: () -> Unit) {
+fun WaterBanner(water: Int, backgroundColor: Color, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            containerColor = backgroundColor,
+            contentColor = contentColorFor(backgroundColor = backgroundColor)
         )
     ) {
         Row(
@@ -214,15 +216,15 @@ fun WaterBanner(water: Int, onClick: () -> Unit) {
 }
 
 @Composable
-fun WeightBanner(weight: Float, onClick: () -> Unit) {
+fun WeightBanner(weight: Float, backgroundColor: Color, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSecondary
+            containerColor = backgroundColor,
+            contentColor = contentColorFor(backgroundColor = backgroundColor)
         )
     ) {
         Row(

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.data.local.DailyScoreEntity
 import com.example.calorietracker.ui.viewmodels.MainViewModel
+import com.example.calorietracker.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +87,7 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 emptyMessage = "No scores available. Ensure you logged food/water yesterday."
             ) { currentScore ->
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(48.dp)) {
+                    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(40.dp)) {
                         Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Score") })
                         Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
                     }
@@ -102,22 +103,22 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             Text("Score Breakdown", style = MaterialTheme.typography.titleLarge)
                             
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                ScoreRingCard(title = "Overall Score", score = currentScore.overallScore, modifier = Modifier.weight(1f), isOverall = true)
-                                ScoreRingCard(title = "Clean Diet", score = currentScore.cleanScore, modifier = Modifier.weight(1f))
+                                ScoreRingCard(title = "Overall Score", score = currentScore.overallScore, modifier = Modifier.weight(1f), isOverall = true, viewModel = viewModel)
+                                ScoreRingCard(title = "Clean Diet", score = currentScore.cleanScore, modifier = Modifier.weight(1f), viewModel = viewModel)
                             }
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                ScoreRingCard(title = "Macros", score = currentScore.macroScore, modifier = Modifier.weight(1f))
-                                ScoreRingCard(title = "Calories", score = currentScore.calorieScore, modifier = Modifier.weight(1f))
+                                ScoreRingCard(title = "Macros", score = currentScore.macroScore, modifier = Modifier.weight(1f), viewModel = viewModel)
+                                ScoreRingCard(title = "Calories", score = currentScore.calorieScore, modifier = Modifier.weight(1f), viewModel = viewModel)
                             }
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                ScoreRingCard(title = "Hydration", score = currentScore.waterScore, modifier = Modifier.weight(1f))
-                                ScoreRingCard(title = "Meal Balance", score = currentScore.balanceScore, modifier = Modifier.weight(1f))
+                                ScoreRingCard(title = "Hydration", score = currentScore.waterScore, modifier = Modifier.weight(1f), viewModel = viewModel)
+                                ScoreRingCard(title = "Meal Balance", score = currentScore.balanceScore, modifier = Modifier.weight(1f), viewModel = viewModel)
                             }
 
                             // AI Feedback
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                colors = CardDefaults.cardColors(containerColor = AppColors.getCardBackgroundColor(viewModel))
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Text("AI Feedback", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -137,7 +138,7 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             Text("Score History", style = MaterialTheme.typography.titleLarge)
                             Card(
                                 modifier = Modifier.fillMaxWidth().height(250.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                colors = CardDefaults.cardColors(containerColor = AppColors.getScoreBannerColor(viewModel))
                             ) {
                                 Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                                     ScoreHistoryGraph(scores = scores, endingAt = currentScore.dateTimestamp)
@@ -152,10 +153,10 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOverall: Boolean = false) {
-    val containerColor = MaterialTheme.colorScheme.surfaceVariant
-    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val borderStroke = if (isOverall) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary) else null
+fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOverall: Boolean = false, viewModel: MainViewModel) {
+    val containerColor = AppColors.getCardBackgroundColor(viewModel)
+    val textColor = contentColorFor(containerColor)
+    val borderStroke = if (isOverall) androidx.compose.foundation.BorderStroke(2.dp, AppColors.getGraphHighlightColor(viewModel)) else null
     
     Card(
         modifier = modifier,

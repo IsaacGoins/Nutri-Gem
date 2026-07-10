@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.example.calorietracker.ui.theme.AppColors
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -93,11 +94,11 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                 days = daySums,
                 getDate = { it.timestamp },
                 modifier = Modifier.padding(paddingValues),
-                emptyMessage = "No meal data available."
+                emptyMessage = "No meals logged yet."
             ) { currentDaySum ->
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(48.dp)) {
-                        Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Macros") })
+                    TabRow(selectedTabIndex = selectedTabIndex, modifier = Modifier.height(40.dp)) {
+                        Tab(selected = selectedTabIndex == 0, onClick = { selectedTabIndex = 0 }, text = { Text("Daily Logs") })
                         Tab(selected = selectedTabIndex == 1, onClick = { selectedTabIndex = 1 }, text = { Text("History Graph") })
                     }
                     
@@ -108,6 +109,7 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                                 protein = currentDaySum.protein,
                                 carbs = currentDaySum.carbs,
                                 fat = currentDaySum.fat,
+                                backgroundColor = AppColors.getHeroBannerColor(viewModel),
                                 onClick = {}
                             )
                         }
@@ -127,7 +129,7 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                             }
                             Card(
                                 modifier = Modifier.fillMaxWidth().height(240.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                                colors = CardDefaults.cardColors(containerColor = AppColors.getMealBannerColor(viewModel))
                             ) {
                                 Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                                     MacroHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp, selectedMetric = selectedMetric)
@@ -218,7 +220,10 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                                 }
                             }
                         ) {
-                            Card(modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded }) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded },
+                                colors = CardDefaults.cardColors(containerColor = AppColors.getCardBackgroundColor(viewModel))
+                            ) {
                                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(meal.name, style = MaterialTheme.typography.titleMedium)

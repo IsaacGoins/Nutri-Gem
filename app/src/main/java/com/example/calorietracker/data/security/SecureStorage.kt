@@ -81,4 +81,21 @@ class SecureStorage(context: Context) {
     fun getProfileNotes(): String {
         return sharedPreferences.getString("PROFILE_NOTES", "") ?: ""
     }
+
+    fun saveDevSettingsEnabled(enabled: Boolean) {
+        sharedPreferences.edit().putBoolean("DEV_SETTINGS_ENABLED", enabled).apply()
+    }
+
+    fun getDevSettingsEnabled(): Boolean {
+        return sharedPreferences.getBoolean("DEV_SETTINGS_ENABLED", false)
+    }
+
+    fun saveColorPreference(key: String, token: String) {
+        sharedPreferences.edit().putString(key, token).apply()
+    }
+
+    fun getColorPreference(key: String, defaultToken: String): String {
+        return sharedPreferences.getString(key, defaultToken) ?: defaultToken
+    }
 }
+

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.calorietracker.ui.viewmodels.GeminiState
 import com.example.calorietracker.ui.viewmodels.MainViewModel
+import com.example.calorietracker.ui.theme.AppColors
 
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -253,6 +254,7 @@ fun AddMealScreen(
                             }
                         }
 
+                        val primaryBtnColor = AppColors.getPrimaryButtonColor(viewModel)
                         Button(
                             onClick = {
                                 val aiItems = mealItems.filter { !it.isManual }
@@ -284,7 +286,8 @@ fun AddMealScreen(
                                     viewModel.analyzeMeal(prompt, manualItems, aiItems.map { it.name })
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = primaryBtnColor, contentColor = contentColorFor(primaryBtnColor))
                         ) {
                             Text("Calculate")
                         }
@@ -576,6 +579,7 @@ fun AddMealScreen(
                                 OutlinedButton(onClick = { viewModel.resetGeminiState() }) {
                                     Text("Discard")
                                 }
+                                val primaryBtnColor = AppColors.getPrimaryButtonColor(viewModel)
                                 Button(onClick = {
                                     data.meal_name = editedMealName
                                     data.total_calories = totalCalories
@@ -585,7 +589,7 @@ fun AddMealScreen(
                                     data.items = editedItems.toList()
                                     viewModel.saveMeal(state.response, editedTimestamp)
                                     onSaveComplete()
-                                }) {
+                                }, colors = ButtonDefaults.buttonColors(containerColor = primaryBtnColor, contentColor = contentColorFor(primaryBtnColor))) {
                                     Text("Save Meal")
                                 }
                             }
