@@ -153,7 +153,7 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                                 colors = CardDefaults.cardColors(containerColor = AppColors.getScoreBannerColor(viewModel))
                             ) {
                                 Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                                    ScoreHistoryGraph(scores = scores, endingAt = currentScore.dateTimestamp)
+                                    ScoreHistoryGraph(scores = scores, endingAt = currentScore.dateTimestamp, viewModel = viewModel)
                                 }
                             }
                         }
@@ -182,7 +182,7 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOv
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = textColor)
             Spacer(modifier = Modifier.height(16.dp))
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
-                val primaryColor = if (isOverall) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                val primaryColor = if (isOverall) AppColors.getScoreWheelOverallColor(viewModel) else AppColors.getScoreWheelCategoryColor(viewModel)
                 val trackColor = primaryColor.copy(alpha = 0.2f)
                 
                 Canvas(modifier = Modifier.size(80.dp)) {
@@ -215,7 +215,7 @@ fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOv
 }
 
 @Composable
-fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailyScoreEntity>, endingAt: Long? = null) {
+fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailyScoreEntity>, endingAt: Long? = null, viewModel: MainViewModel) {
     if (scores.isEmpty()) return
     
     val allSorted = scores.sortedBy { it.dateTimestamp }
@@ -231,7 +231,7 @@ fun ScoreHistoryGraph(scores: List<com.example.calorietracker.data.local.DailySc
     }
     
     val maxScore = 100f
-    val lineColor = MaterialTheme.colorScheme.tertiary
+    val lineColor = AppColors.getScoreHistoryLineColor(viewModel)
     var selectedIndex by remember(endingAt, sortedScores) { 
         mutableStateOf<Int?>(null) 
     }

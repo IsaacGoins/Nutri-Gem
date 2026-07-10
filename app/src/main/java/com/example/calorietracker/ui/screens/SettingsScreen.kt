@@ -198,7 +198,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             ) {
                 Checkbox(checked = devEnabled, onCheckedChange = { viewModel.saveDevSettingsEnabled(it) })
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Enable Developer Settings (Color Remapping)", style = MaterialTheme.typography.bodyMedium)
+                Text("Enable Developer Settings", style = MaterialTheme.typography.bodyMedium)
             }
             
             if (devEnabled) {
@@ -217,7 +217,17 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     "COLOR_PRIMARY_BUTTON" to "Primary Button",
                     "COLOR_SECONDARY_BUTTON" to "Secondary Button",
                     "COLOR_CARD_BACKGROUND" to "Card Background",
-                    "COLOR_GRAPH_HIGHLIGHT" to "Graph Highlight"
+                    "COLOR_GRAPH_HIGHLIGHT" to "Graph Highlight",
+                    "COLOR_MACRO_WHEEL_EMPTY" to "Macro Wheel Empty",
+                    "COLOR_MACRO_PROTEIN" to "Macro Wheel Protein",
+                    "COLOR_MACRO_CARBS" to "Macro Wheel Carbs",
+                    "COLOR_MACRO_FAT" to "Macro Wheel Fat",
+                    "COLOR_SCORE_WHEEL_OVERALL" to "Score Wheel Overall",
+                    "COLOR_SCORE_WHEEL_CATEGORY" to "Score Wheel Category",
+                    "COLOR_SCORE_HISTORY_LINE" to "Score History Line",
+                    "COLOR_WATER_GRAPH_BAR" to "Water Graph Bar",
+                    "COLOR_WEIGHT_GRAPH_LINE" to "Weight Graph Line",
+                    "COLOR_SWIPE_DELETE_BACKGROUND" to "Swipe Delete Background"
                 )
                 
                 mappingKeys.forEach { (prefKey, label) ->
@@ -257,6 +267,14 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             }
                         }
                     }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { viewModel.resetColorPreferences() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Reset Developer Settings to Defaults")
                 }
             }
             

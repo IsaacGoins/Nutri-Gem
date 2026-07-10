@@ -82,6 +82,7 @@ fun HomeScreen(
                     carbs = carbs ?: 0,
                     fat = fat ?: 0,
                     backgroundColor = AppColors.getHeroBannerColor(viewModel),
+                    viewModel = viewModel,
                     onClick = onNavigateToMeals
                 )
 
@@ -118,7 +119,7 @@ fun ScoreBanner(score: Int, backgroundColor: Color, onClick: () -> Unit) {
 
 
 @Composable
-fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, backgroundColor: Color, onClick: () -> Unit) {
+fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, backgroundColor: Color, viewModel: MainViewModel, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,13 +134,18 @@ fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, backgroundCol
             Text("Daily Macros", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(16.dp))
             
+            val emptyColor = AppColors.getMacroWheelEmptyColor(viewModel)
+            val proteinColor = AppColors.getMacroProteinColor(viewModel)
+            val carbsColor = AppColors.getMacroCarbsColor(viewModel)
+            val fatColor = AppColors.getMacroFatColor(viewModel)
+
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(200.dp)) {
                 Canvas(modifier = Modifier.size(160.dp)) {
                     val stroke = Stroke(width = 30f, cap = StrokeCap.Round)
                     val totalGrams = (protein + carbs + fat).toFloat()
                     
                     if (totalGrams == 0f) {
-                        drawArc(Color.LightGray, 0f, 360f, false, style = stroke)
+                        drawArc(emptyColor, 0f, 360f, false, style = stroke)
                     } else {
                         val proteinAngle = (protein / totalGrams) * 360f
                         val carbsAngle = (carbs / totalGrams) * 360f
@@ -148,15 +154,15 @@ fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, backgroundCol
                         var startAngle = -90f
                         
                         if (protein > 0) {
-                            drawArc(Color(0xFFEF5350), startAngle, proteinAngle, false, style = stroke)
+                            drawArc(proteinColor, startAngle, proteinAngle, false, style = stroke)
                             startAngle += proteinAngle
                         }
                         if (carbs > 0) {
-                            drawArc(Color(0xFF66BB6A), startAngle, carbsAngle, false, style = stroke)
+                            drawArc(carbsColor, startAngle, carbsAngle, false, style = stroke)
                             startAngle += carbsAngle
                         }
                         if (fat > 0) {
-                            drawArc(Color(0xFF42A5F5), startAngle, fatAngle, false, style = stroke)
+                            drawArc(fatColor, startAngle, fatAngle, false, style = stroke)
                         }
                     }
                 }

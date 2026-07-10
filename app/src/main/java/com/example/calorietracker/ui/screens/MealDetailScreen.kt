@@ -122,6 +122,7 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                                 carbs = currentDaySum.carbs,
                                 fat = currentDaySum.fat,
                                 backgroundColor = AppColors.getHeroBannerColor(viewModel),
+                                viewModel = viewModel,
                                 onClick = {}
                             )
                         }
@@ -144,7 +145,7 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                                 colors = CardDefaults.cardColors(containerColor = AppColors.getMealBannerColor(viewModel))
                             ) {
                                 Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                                    MacroHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp, selectedMetric = selectedMetric)
+                                    MacroHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp, selectedMetric = selectedMetric, viewModel = viewModel)
                                 }
                             }
                         }
@@ -656,7 +657,8 @@ fun EditMealScreen(meal: MealEntity, viewModel: MainViewModel, onDismiss: () -> 
 fun MacroHistoryGraph(
     daySums: List<DaySum>, 
     endingAt: Long, 
-    selectedMetric: String
+    selectedMetric: String,
+    viewModel: MainViewModel
 ) {
     if (daySums.isEmpty()) return
     
@@ -672,12 +674,12 @@ fun MacroHistoryGraph(
         allSorted.takeLast(7)
     }
     
-    val primaryColor = MaterialTheme.colorScheme.primary
+    val primaryColor = AppColors.getScoreWheelOverallColor(viewModel)
     val lineColor = when(selectedMetric) {
         "Kcal" -> primaryColor
-        "Protein" -> Color(0xFFEF5350) 
-        "Carbs" -> Color(0xFF66BB6A) 
-        else -> Color(0xFF42A5F5) 
+        "Protein" -> AppColors.getMacroProteinColor(viewModel)
+        "Carbs" -> AppColors.getMacroCarbsColor(viewModel)
+        else -> AppColors.getMacroFatColor(viewModel)
     }
     
     var selectedIndex by remember(endingAt, filteredDays) { 

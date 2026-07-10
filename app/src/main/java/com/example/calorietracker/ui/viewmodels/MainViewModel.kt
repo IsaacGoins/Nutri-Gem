@@ -106,7 +106,17 @@ class MainViewModel(
             "COLOR_PRIMARY_BUTTON" to "Primary",
             "COLOR_SECONDARY_BUTTON" to "Secondary",
             "COLOR_CARD_BACKGROUND" to "SurfaceVariant",
-            "COLOR_GRAPH_HIGHLIGHT" to "Primary"
+            "COLOR_GRAPH_HIGHLIGHT" to "Primary",
+            "COLOR_MACRO_WHEEL_EMPTY" to "Outline",
+            "COLOR_MACRO_PROTEIN" to "Error",
+            "COLOR_MACRO_CARBS" to "Primary",
+            "COLOR_MACRO_FAT" to "Secondary",
+            "COLOR_SCORE_WHEEL_OVERALL" to "Primary",
+            "COLOR_SCORE_WHEEL_CATEGORY" to "Tertiary",
+            "COLOR_SCORE_HISTORY_LINE" to "Tertiary",
+            "COLOR_WATER_GRAPH_BAR" to "Primary",
+            "COLOR_WEIGHT_GRAPH_LINE" to "Primary",
+            "COLOR_SWIPE_DELETE_BACKGROUND" to "Error"
         )
         
         val map = keys.associateWith { key ->
@@ -118,6 +128,20 @@ class MainViewModel(
     fun saveColorPreference(key: String, token: String) {
         secureStorage.saveColorPreference(key, token)
         _colorPreferences.value = _colorPreferences.value.toMutableMap().apply { put(key, token) }
+    }
+
+    fun resetColorPreferences() {
+        val keys = listOf(
+            "COLOR_HERO_BANNER", "COLOR_SCORE_BANNER", "COLOR_MEAL_BANNER",
+            "COLOR_WATER_BANNER", "COLOR_WEIGHT_BANNER", "COLOR_PRIMARY_BUTTON",
+            "COLOR_SECONDARY_BUTTON", "COLOR_CARD_BACKGROUND", "COLOR_GRAPH_HIGHLIGHT",
+            "COLOR_MACRO_WHEEL_EMPTY", "COLOR_MACRO_PROTEIN", "COLOR_MACRO_CARBS",
+            "COLOR_MACRO_FAT", "COLOR_SCORE_WHEEL_OVERALL", "COLOR_SCORE_WHEEL_CATEGORY",
+            "COLOR_SCORE_HISTORY_LINE", "COLOR_WATER_GRAPH_BAR", "COLOR_WEIGHT_GRAPH_LINE",
+            "COLOR_SWIPE_DELETE_BACKGROUND"
+        )
+        secureStorage.clearColorPreferences(keys)
+        loadColorPreferences()
     }
 
     private val _age = MutableStateFlow(secureStorage.getAge())

@@ -100,7 +100,7 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         colors = CardDefaults.cardColors(containerColor = AppColors.getWaterBannerColor(viewModel))
                     ) {
                         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                            WaterHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp)
+                            WaterHistoryGraph(daySums = daySums, endingAt = currentDaySum.timestamp, viewModel = viewModel)
                         }
                     }
                 }
@@ -170,7 +170,7 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             backgroundContent = {
                                 val color = when (dismissState.dismissDirection) {
                                     SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
-                                    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.error
+                                    SwipeToDismissBoxValue.EndToStart -> AppColors.getSwipeDeleteBackgroundColor(viewModel)
                                     else -> Color.Transparent
                                 }
                                 val icon = when (dismissState.dismissDirection) {
@@ -222,7 +222,8 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 @Composable
 fun WaterHistoryGraph(
     daySums: List<WaterDaySum>, 
-    endingAt: Long
+    endingAt: Long,
+    viewModel: MainViewModel
 ) {
     if (daySums.isEmpty()) return
     
@@ -241,6 +242,8 @@ fun WaterHistoryGraph(
     var selectedIndex by remember(endingAt, filteredDays) { 
         mutableStateOf<Int?>(null) 
     }
+    
+    val barColor = AppColors.getWaterGraphBarColor(viewModel)
     
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
@@ -295,7 +298,7 @@ fun WaterHistoryGraph(
                 drawContext.canvas.nativeCanvas.drawText(shortDate, xOffset - 10f, size.height + 40f, axisPaint)
 
                 drawRoundRect(
-                    color = if (selectedIndex == index) Color.White else Color(0xFF00BCD4),
+                    color = if (selectedIndex == index) Color.White else barColor,
                     topLeft = Offset(xOffset, yOffset),
                     size = Size(barWidth, barHeight),
                     cornerRadius = CornerRadius(12f, 12f)

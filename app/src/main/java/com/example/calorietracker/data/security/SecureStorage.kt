@@ -97,5 +97,11 @@ class SecureStorage(context: Context) {
     fun getColorPreference(key: String, defaultToken: String): String {
         return sharedPreferences.getString(key, defaultToken) ?: defaultToken
     }
+
+    fun clearColorPreferences(keys: List<String>) {
+        val editor = sharedPreferences.edit()
+        keys.forEach { editor.remove(it) }
+        editor.apply()
+    }
 }
 

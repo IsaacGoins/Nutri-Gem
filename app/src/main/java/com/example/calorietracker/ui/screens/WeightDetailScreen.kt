@@ -120,6 +120,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     }
                 } else {
                     val lineColor = MaterialTheme.colorScheme.onSecondary
+                    val graphLineColor = AppColors.getWeightGraphLineColor(viewModel)
                     val cardBgColor = MaterialTheme.colorScheme.secondary
                     androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(top = 24.dp, bottom = 48.dp, start = 48.dp, end = 24.dp)) {
                         val allWeights = daySums.map { it.weightLbs }.toMutableList()
@@ -185,7 +186,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         if (daySums.size > 1) {
                             drawPath(
                                 path = path,
-                                color = lineColor,
+                                color = graphLineColor,
                                 style = androidx.compose.ui.graphics.drawscope.Stroke(width = 8f, cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round)
                             )
                         }
@@ -196,7 +197,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             val yOffset = size.height - valueHeight
 
                             drawCircle(color = cardBgColor, radius = 16f, center = Offset(xOffset, yOffset))
-                            drawCircle(color = lineColor, radius = 10f, center = Offset(xOffset, yOffset))
+                            drawCircle(color = graphLineColor, radius = 10f, center = Offset(xOffset, yOffset))
                         }
                     }
                 }
@@ -310,7 +311,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             state = dismissState,
                             backgroundContent = {
                                 val color = when (dismissState.dismissDirection) {
-                                    SwipeToDismissBoxValue.EndToStart, SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.error
+                                    SwipeToDismissBoxValue.EndToStart, SwipeToDismissBoxValue.StartToEnd -> AppColors.getSwipeDeleteBackgroundColor(viewModel)
                                     else -> Color.Transparent
                                 }
                                 val alignment = when (dismissState.dismissDirection) {
