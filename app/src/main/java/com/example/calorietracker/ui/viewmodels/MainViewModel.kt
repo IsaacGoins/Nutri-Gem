@@ -100,7 +100,7 @@ class MainViewModel(
             "COLOR_SCORE_WHEEL_OVERALL" to "Primary",
             "COLOR_SCORE_WHEEL_CATEGORY" to "Tertiary",
             "COLOR_SCORE_HISTORY_LINE" to "Tertiary",
-            "COLOR_WATER_GRAPH_BAR" to "Tertiary",
+            "COLOR_WATER_GRAPH_BAR" to "OnPrimaryContainer",
             "COLOR_WEIGHT_GRAPH_LINE" to "Primary",
             "COLOR_SWIPE_DELETE_BACKGROUND" to "Error"
         )
