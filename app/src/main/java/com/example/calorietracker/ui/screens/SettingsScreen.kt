@@ -208,26 +208,35 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 
                 val prefs by viewModel.colorPreferences.collectAsState()
                 
-                val mappingKeys = listOf(
-                    "COLOR_HERO_BANNER" to "Hero Banner",
-                    "COLOR_SCORE_BANNER" to "Score Banner & Graph",
-                    "COLOR_MEAL_BANNER" to "Meal Banner",
-                    "COLOR_WATER_BANNER" to "Water Banner & Graph",
-                    "COLOR_WEIGHT_BANNER" to "Weight Banner & Graph",
-                    "COLOR_PRIMARY_BUTTON" to "Primary Button",
-                    "COLOR_SECONDARY_BUTTON" to "Secondary Button",
-                    "COLOR_CARD_BACKGROUND" to "Card Background",
-                    "COLOR_GRAPH_HIGHLIGHT" to "Graph Highlight",
-                    "COLOR_MACRO_WHEEL_EMPTY" to "Macro Wheel Empty",
-                    "COLOR_SCORE_WHEEL_OVERALL" to "Score Wheel Overall",
-                    "COLOR_SCORE_WHEEL_CATEGORY" to "Score Wheel Category",
-                    "COLOR_SCORE_HISTORY_LINE" to "Score History Line",
-                    "COLOR_WATER_GRAPH_BAR" to "Water Graph Bar",
-                    "COLOR_WEIGHT_GRAPH_LINE" to "Weight Graph Line",
-                    "COLOR_SWIPE_DELETE_BACKGROUND" to "Swipe Delete Background"
+                val colorCategories = mapOf(
+                    "Banners & Backgrounds" to listOf(
+                        "COLOR_HERO_BANNER" to "Hero Banner",
+                        "COLOR_SCORE_BANNER" to "Score Banner & Graph",
+                        "COLOR_MEAL_BANNER" to "Meal Banner",
+                        "COLOR_WATER_BANNER" to "Water Banner & Graph",
+                        "COLOR_WEIGHT_BANNER" to "Weight Banner & Graph",
+                        "COLOR_CARD_BACKGROUND" to "Card Background"
+                    ),
+                    "Buttons & Interactions" to listOf(
+                        "COLOR_PRIMARY_BUTTON" to "Primary Button",
+                        "COLOR_SECONDARY_BUTTON" to "Secondary Button",
+                        "COLOR_SWIPE_DELETE_BACKGROUND" to "Swipe Delete Background"
+                    ),
+                    "Graphs & Data Visualization" to listOf(
+                        "COLOR_GRAPH_HIGHLIGHT" to "Graph Highlight",
+                        "COLOR_MACRO_WHEEL_EMPTY" to "Macro Wheel Empty",
+                        "COLOR_SCORE_WHEEL_OVERALL" to "Score Wheel Overall",
+                        "COLOR_SCORE_WHEEL_CATEGORY" to "Score Wheel Category",
+                        "COLOR_SCORE_HISTORY_LINE" to "Score History Line",
+                        "COLOR_WATER_GRAPH_BAR" to "Water Graph Bar",
+                        "COLOR_WEIGHT_GRAPH_LINE" to "Weight Graph Line"
+                    )
                 )
                 
-                mappingKeys.forEach { (prefKey, label) ->
+                colorCategories.forEach { (categoryName, keys) ->
+                    Text(categoryName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
+                    
+                    keys.forEach { (prefKey, label) ->
                     var expanded by remember { mutableStateOf(false) }
                     val currentSelection = prefs[prefKey] ?: MainViewModel.DEFAULT_TOKENS[prefKey] ?: "Primary"
                     
@@ -264,6 +273,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -278,4 +288,5 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
+}
 }
