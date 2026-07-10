@@ -135,9 +135,9 @@ fun HeroSection(calories: Int, protein: Int, carbs: Int, fat: Int, backgroundCol
             Spacer(modifier = Modifier.height(16.dp))
             
             val emptyColor = AppColors.getMacroWheelEmptyColor(viewModel)
-            val proteinColor = AppColors.getMacroProteinColor(viewModel)
-            val carbsColor = AppColors.getMacroCarbsColor(viewModel)
-            val fatColor = AppColors.getMacroFatColor(viewModel)
+            val proteinColor = Color(0xFFEF5350)
+            val carbsColor = Color(0xFF66BB6A)
+            val fatColor = Color(0xFF42A5F5)
 
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(200.dp)) {
                 Canvas(modifier = Modifier.size(160.dp)) {

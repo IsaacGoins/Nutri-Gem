@@ -85,19 +85,8 @@ class MainViewModel(
         _devSettingsEnabled.value = enabled
     }
 
-    private fun loadColorPreferences() {
-        val keys = listOf(
-            "COLOR_HERO_BANNER",
-            "COLOR_SCORE_BANNER",
-            "COLOR_MEAL_BANNER",
-            "COLOR_WATER_BANNER",
-            "COLOR_WEIGHT_BANNER",
-            "COLOR_PRIMARY_BUTTON",
-            "COLOR_SECONDARY_BUTTON",
-            "COLOR_CARD_BACKGROUND",
-            "COLOR_GRAPH_HIGHLIGHT"
-        )
-        val defaultTokens = mapOf(
+    companion object {
+        val DEFAULT_TOKENS = mapOf(
             "COLOR_HERO_BANNER" to "SurfaceVariant",
             "COLOR_SCORE_BANNER" to "TertiaryContainer",
             "COLOR_MEAL_BANNER" to "SecondaryContainer",
@@ -108,9 +97,6 @@ class MainViewModel(
             "COLOR_CARD_BACKGROUND" to "SurfaceVariant",
             "COLOR_GRAPH_HIGHLIGHT" to "Primary",
             "COLOR_MACRO_WHEEL_EMPTY" to "Outline",
-            "COLOR_MACRO_PROTEIN" to "Error",
-            "COLOR_MACRO_CARBS" to "Primary",
-            "COLOR_MACRO_FAT" to "Secondary",
             "COLOR_SCORE_WHEEL_OVERALL" to "Primary",
             "COLOR_SCORE_WHEEL_CATEGORY" to "Tertiary",
             "COLOR_SCORE_HISTORY_LINE" to "Tertiary",
@@ -118,9 +104,11 @@ class MainViewModel(
             "COLOR_WEIGHT_GRAPH_LINE" to "Primary",
             "COLOR_SWIPE_DELETE_BACKGROUND" to "Error"
         )
-        
-        val map = keys.associateWith { key ->
-            secureStorage.getColorPreference(key, defaultTokens[key] ?: "Primary")
+    }
+
+    private fun loadColorPreferences() {
+        val map = DEFAULT_TOKENS.keys.associateWith { key ->
+            secureStorage.getColorPreference(key, DEFAULT_TOKENS[key] ?: "Primary")
         }
         _colorPreferences.value = map
     }
@@ -131,16 +119,7 @@ class MainViewModel(
     }
 
     fun resetColorPreferences() {
-        val keys = listOf(
-            "COLOR_HERO_BANNER", "COLOR_SCORE_BANNER", "COLOR_MEAL_BANNER",
-            "COLOR_WATER_BANNER", "COLOR_WEIGHT_BANNER", "COLOR_PRIMARY_BUTTON",
-            "COLOR_SECONDARY_BUTTON", "COLOR_CARD_BACKGROUND", "COLOR_GRAPH_HIGHLIGHT",
-            "COLOR_MACRO_WHEEL_EMPTY", "COLOR_MACRO_PROTEIN", "COLOR_MACRO_CARBS",
-            "COLOR_MACRO_FAT", "COLOR_SCORE_WHEEL_OVERALL", "COLOR_SCORE_WHEEL_CATEGORY",
-            "COLOR_SCORE_HISTORY_LINE", "COLOR_WATER_GRAPH_BAR", "COLOR_WEIGHT_GRAPH_LINE",
-            "COLOR_SWIPE_DELETE_BACKGROUND"
-        )
-        secureStorage.clearColorPreferences(keys)
+        secureStorage.clearColorPreferences(DEFAULT_TOKENS.keys.toList())
         loadColorPreferences()
     }
 

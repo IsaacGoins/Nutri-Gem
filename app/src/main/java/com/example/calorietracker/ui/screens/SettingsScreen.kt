@@ -219,9 +219,6 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     "COLOR_CARD_BACKGROUND" to "Card Background",
                     "COLOR_GRAPH_HIGHLIGHT" to "Graph Highlight",
                     "COLOR_MACRO_WHEEL_EMPTY" to "Macro Wheel Empty",
-                    "COLOR_MACRO_PROTEIN" to "Macro Wheel Protein",
-                    "COLOR_MACRO_CARBS" to "Macro Wheel Carbs",
-                    "COLOR_MACRO_FAT" to "Macro Wheel Fat",
                     "COLOR_SCORE_WHEEL_OVERALL" to "Score Wheel Overall",
                     "COLOR_SCORE_WHEEL_CATEGORY" to "Score Wheel Category",
                     "COLOR_SCORE_HISTORY_LINE" to "Score History Line",
@@ -232,7 +229,7 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 
                 mappingKeys.forEach { (prefKey, label) ->
                     var expanded by remember { mutableStateOf(false) }
-                    val currentSelection = prefs[prefKey] ?: "Primary"
+                    val currentSelection = prefs[prefKey] ?: MainViewModel.DEFAULT_TOKENS[prefKey] ?: "Primary"
                     
                     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)

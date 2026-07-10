@@ -677,9 +677,9 @@ fun MacroHistoryGraph(
     val primaryColor = AppColors.getScoreWheelOverallColor(viewModel)
     val lineColor = when(selectedMetric) {
         "Kcal" -> primaryColor
-        "Protein" -> AppColors.getMacroProteinColor(viewModel)
-        "Carbs" -> AppColors.getMacroCarbsColor(viewModel)
-        else -> AppColors.getMacroFatColor(viewModel)
+        "Protein" -> Color(0xFFEF5350)
+        "Carbs" -> Color(0xFF66BB6A)
+        else -> Color(0xFF42A5F5)
     }
     
     var selectedIndex by remember(endingAt, filteredDays) { 
