@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -244,6 +245,8 @@ fun WaterHistoryGraph(
     }
     
     val barColor = AppColors.getWaterGraphBarColor(viewModel)
+    val bannerColor = AppColors.getWaterBannerColor(viewModel)
+    val axisTextColor = androidx.compose.material3.contentColorFor(bannerColor).toArgb()
     
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
@@ -282,7 +285,7 @@ fun WaterHistoryGraph(
             }
 
             val axisPaint = android.graphics.Paint().apply {
-                color = android.graphics.Color.GRAY
+                color = axisTextColor
                 textSize = 30f
             }
             
