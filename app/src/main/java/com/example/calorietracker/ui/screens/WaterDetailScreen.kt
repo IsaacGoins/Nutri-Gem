@@ -200,8 +200,7 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                         ) {
                             Card(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { waterToEdit = water },
+                                    .fillMaxWidth(),
                                 colors = CardDefaults.cardColors(containerColor = AppColors.getCardBackgroundColor(viewModel))
                             ) {
                                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -209,7 +208,6 @@ fun WaterDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                                         Text("${water.amountOz} oz", style = MaterialTheme.typography.titleMedium)
                                         Text(timeFormat.format(Date(water.timestamp)), style = MaterialTheme.typography.bodySmall)
                                     }
-                                    Icon(Icons.Default.LocalDrink, contentDescription = "Water", tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }

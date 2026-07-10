@@ -49,6 +49,10 @@ class HealthRepository(private val healthDao: HealthDao) {
         healthDao.deleteWeight(weight)
     }
 
+    suspend fun updateWeight(weight: com.example.calorietracker.data.local.WeightEntity) {
+        healthDao.updateWeight(weight)
+    }
+
     fun getAllScores(): Flow<List<com.example.calorietracker.data.local.DailyScoreEntity>> = healthDao.getAllScores()
 
     suspend fun addScore(score: com.example.calorietracker.data.local.DailyScoreEntity) {

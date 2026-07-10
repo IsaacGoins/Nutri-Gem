@@ -46,8 +46,11 @@ interface HealthDao {
     @androidx.room.Update
     suspend fun updateWater(water: WaterEntity)
 
-    @Insert
+    @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     suspend fun insertWeight(weight: WeightEntity)
+    
+    @androidx.room.Update
+    suspend fun updateWeight(weight: WeightEntity)
 
     @androidx.room.Delete
     suspend fun deleteWeight(weight: WeightEntity)

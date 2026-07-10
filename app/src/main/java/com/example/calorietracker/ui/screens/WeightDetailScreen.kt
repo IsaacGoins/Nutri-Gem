@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -210,6 +211,7 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
             
             val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
             var weightToDelete by remember { mutableStateOf<WeightEntity?>(null) }
+            var weightToEdit by remember { mutableStateOf<WeightEntity?>(null) }
             
             if (weightToDelete != null) {
                 AlertDialog(
@@ -224,6 +226,34 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     },
                     dismissButton = {
                         TextButton(onClick = { weightToDelete = null }) { Text("Cancel") }
+                    }
+                )
+            }
+            
+            if (weightToEdit != null) {
+                var weightInput by remember { mutableStateOf(weightToEdit!!.weightLbs.toString()) }
+                AlertDialog(
+                    onDismissRequest = { weightToEdit = null },
+                    title = { Text("Edit Weight") },
+                    text = {
+                        OutlinedTextField(
+                            value = weightInput,
+                            onValueChange = { weightInput = it },
+                            label = { Text("Weight (lbs)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            weightInput.toFloatOrNull()?.let {
+                                viewModel.updateWeight(weightToEdit!!.copy(weightLbs = it))
+                            }
+                            weightToEdit = null
+                        }) { Text("Save") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { weightToEdit = null }) { Text("Cancel") }
                     }
                 )
             }
@@ -298,8 +328,11 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                     items(logsForDay, key = { it.id }) { weight ->
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = {
-                                if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
+                                if (it == SwipeToDismissBoxValue.EndToStart) {
                                     weightToDelete = weight
+                                    false
+                                } else if (it == SwipeToDismissBoxValue.StartToEnd) {
+                                    weightToEdit = weight
                                     false
                                 } else {
                                     false
@@ -311,7 +344,8 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                             state = dismissState,
                             backgroundContent = {
                                 val color = when (dismissState.dismissDirection) {
-                                    SwipeToDismissBoxValue.EndToStart, SwipeToDismissBoxValue.StartToEnd -> AppColors.getSwipeDeleteBackgroundColor(viewModel)
+                                    SwipeToDismissBoxValue.StartToEnd -> AppColors.getSwipeEditBackgroundColor(viewModel)
+                                    SwipeToDismissBoxValue.EndToStart -> AppColors.getSwipeDeleteBackgroundColor(viewModel)
                                     else -> Color.Transparent
                                 }
                                 val alignment = when (dismissState.dismissDirection) {
@@ -327,7 +361,9 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                                         .padding(horizontal = 20.dp),
                                     contentAlignment = alignment
                                 ) {
-                                    if (dismissState.dismissDirection != SwipeToDismissBoxValue.Settled) {
+                                    if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onError)
+                                    } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
                                         Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onError)
                                     }
                                 }
@@ -342,7 +378,6 @@ fun WeightDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                                         Text("${weight.weightLbs} lbs", style = MaterialTheme.typography.titleMedium)
                                         Text(timeFormat.format(Date(weight.timestamp)), style = MaterialTheme.typography.bodySmall)
                                     }
-                                    Icon(Icons.Default.MonitorWeight, contentDescription = "Weight", tint = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }

@@ -193,6 +193,12 @@ class MainViewModel(
         }
     }
 
+    fun updateWeight(weight: com.example.calorietracker.data.local.WeightEntity) {
+        viewModelScope.launch {
+            repository.updateWeight(weight)
+        }
+    }
+
     fun updateMeal(meal: MealEntity) {
         viewModelScope.launch {
             repository.updateMeal(meal)
