@@ -168,7 +168,7 @@ fun ScoreDetailScreen(viewModel: MainViewModel, onBack: () -> Unit) {
 fun ScoreRingCard(title: String, score: Int, modifier: Modifier = Modifier, isOverall: Boolean = false, viewModel: MainViewModel) {
     val containerColor = AppColors.getCardBackgroundColor(viewModel)
     val textColor = contentColorFor(containerColor)
-    val borderStroke = if (isOverall) androidx.compose.foundation.BorderStroke(2.dp, AppColors.getGraphHighlightColor(viewModel)) else null
+    val borderStroke = if (isOverall) androidx.compose.foundation.BorderStroke(2.dp, AppColors.getScoreBannerColor(viewModel)) else null
     
     Card(
         modifier = modifier,

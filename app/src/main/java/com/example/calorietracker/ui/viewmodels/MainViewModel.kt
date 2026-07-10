@@ -97,7 +97,7 @@ class MainViewModel(
             "COLOR_CARD_BACKGROUND" to "SurfaceVariant",
             "COLOR_GRAPH_HIGHLIGHT" to "Primary",
             "COLOR_MACRO_WHEEL_EMPTY" to "Outline",
-            "COLOR_SCORE_WHEEL_OVERALL" to "Tertiary",
+            "COLOR_SCORE_WHEEL_OVERALL" to "Primary",
             "COLOR_SCORE_WHEEL_CATEGORY" to "Tertiary",
             "COLOR_SCORE_HISTORY_LINE" to "Tertiary",
             "COLOR_WATER_GRAPH_BAR" to "OnPrimaryContainer",
