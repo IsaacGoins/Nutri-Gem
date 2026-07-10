@@ -81,7 +81,7 @@ fun HomeScreen(
                     protein = protein ?: 0,
                     carbs = carbs ?: 0,
                     fat = fat ?: 0,
-                    backgroundColor = AppColors.getHeroBannerColor(viewModel),
+                    backgroundColor = AppColors.getMealBannerColor(viewModel),
                     viewModel = viewModel,
                     onClick = onNavigateToMeals
                 )

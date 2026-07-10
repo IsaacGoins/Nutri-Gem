@@ -121,7 +121,7 @@ fun MealDetailScreen(viewModel: MainViewModel, onBack: () -> Unit, onEditingChan
                                 protein = currentDaySum.protein,
                                 carbs = currentDaySum.carbs,
                                 fat = currentDaySum.fat,
-                                backgroundColor = AppColors.getHeroBannerColor(viewModel),
+                                backgroundColor = AppColors.getMealBannerColor(viewModel),
                                 viewModel = viewModel,
                                 onClick = {}
                             )

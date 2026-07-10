@@ -212,9 +212,8 @@ fun SettingsScreen(viewModel: MainViewModel, onBack: () -> Unit) {
                 
                 val colorCategories = mapOf(
                     "Banners & Backgrounds" to listOf(
-                        "COLOR_HERO_BANNER" to "Hero Banner",
+                        "COLOR_MEAL_BANNER" to "Meal Banner & Graph",
                         "COLOR_SCORE_BANNER" to "Score Banner & Graph",
-                        "COLOR_MEAL_BANNER" to "Meal Banner",
                         "COLOR_WATER_BANNER" to "Water Banner & Graph",
                         "COLOR_WEIGHT_BANNER" to "Weight Banner & Graph",
                         "COLOR_CARD_BACKGROUND" to "Card Background"

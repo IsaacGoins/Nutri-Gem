@@ -87,7 +87,6 @@ class MainViewModel(
 
     companion object {
         val DEFAULT_TOKENS = mapOf(
-            "COLOR_HERO_BANNER" to "SurfaceVariant",
             "COLOR_SCORE_BANNER" to "TertiaryContainer",
             "COLOR_MEAL_BANNER" to "SecondaryContainer",
             "COLOR_WATER_BANNER" to "PrimaryContainer",
